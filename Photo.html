@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Us 💙</title>
+
+  <style>
+    :root{
+      --bg: #0b0d12;
+      --card: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --radius: 18px;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+    }
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(255, 205, 165, .18), transparent 60%),
+        radial-gradient(1000px 600px at 90% 40%, rgba(176, 220, 255, .16), transparent 55%),
+        radial-gradient(900px 600px at 50% 90%, rgba(190, 255, 210, .10), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      overflow-x: hidden;
+    }
+    header{
+      max-width: 1100px;
+      margin: 32px auto 16px;
+      padding: 0 18px;
+      display:flex;
+      align-items:flex-end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .title{ display:flex; flex-direction:column; gap: 6px; }
+    h1{
+      margin:0;
+      font-size: clamp(26px, 3.2vw, 38px);
+      letter-spacing: -0.02em;
+    }
+    .subtitle{ color: var(--muted); font-size: 14px; line-height: 1.4; }
+
+    .controls{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    button{
+      appearance:none;
+      border: 1px solid var(--stroke);
+      background: var(--card);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      transition: transform .12s ease, background .2s ease, border-color .2s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      font-weight: 600;
+      font-size: 13px;
+    }
+    button:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
+    button:active{ transform: translateY(0px) scale(.98); }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: var(--card);
+      font-size: 13px;
+      color: var(--muted);
+      user-select:none;
+    }
+    .toggle input{
+      width: 18px; height: 18px;
+      accent-color: #ffd9a0;
+      cursor:pointer;
+    }
+
+    main{
+      max-width: 1100px;
+      margin: 0 auto 40px;
+      padding: 0 18px 30px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+
+    .tile{
+      position:relative;
+      border-radius: var(--radius);
+      overflow:hidden;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+      transform: translateZ(0);
+      aspect-ratio: 1 / 1;
+      cursor: pointer;
+    }
+    .tile.large{ grid-column: span 6; grid-row: span 2; aspect-ratio: 3 / 2; }
+    .tile.wide{ grid-column: span 6; aspect-ratio: 16 / 9; }
+    .tile.tall{ grid-column: span 3; grid-row: span 2; aspect-ratio: 3 / 4; }
+    .tile.medium{ grid-column: span 3; aspect-ratio: 1 / 1; }
+
+    @media (max-width: 900px){
+      .tile.large{ grid-column: span 12; }
+      .tile.wide{ grid-column: span 12; }
+      .tile.tall{ grid-column: span 6; }
+      .tile.medium{ grid-column: span 6; }
+    }
+    @media (max-width: 520px){
+      .tile.tall{ grid-column: span 12; }
+      .tile.medium{ grid-column: span 12; }
+    }
+
+    img, video{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+      transform: scale(1.02);
+      filter: saturate(1.05) contrast(1.03);
+    }
+
+    .badge{
+      position:absolute;
+      left: 10px;
+      bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,.92);
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.20);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      text-shadow: 0 1px 8px rgba(0,0,0,.35);
+      letter-spacing: .01em;
+    }
+
+    .videoHint{
+      position:absolute;
+      right: 10px;
+      bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(255,255,255,.92);
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.20);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      text-shadow: 0 1px 8px rgba(0,0,0,.35);
+      letter-spacing: .02em;
+    }
+
+    .fade-out{ animation: fadeOut .35s ease forwards; }
+    .fade-in{ animation: fadeIn .45s ease forwards; }
+    @keyframes fadeOut{ to{ opacity:0; transform: scale(1.04); } }
+    @keyframes fadeIn{ from{ opacity:0; transform: scale(1.04); } to{ opacity:1; transform: scale(1.02); } }
+
+    footer{
+      max-width: 1100px;
+      margin: 10px auto 30px;
+      padding: 0 18px;
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+      display:flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="title">
+      <h1>Us 💙</h1>
+      <div class="subtitle">A collage of photos + “live” video moments.</div>
+    </div>
+
+    <div class="controls">
+      <button id="shuffleBtn">Shuffle now</button>
+      <button id="refreshBtn">New collage</button>
+      <label class="toggle" title="Auto shuffle every few seconds">
+        <input id="autoToggle" type="checkbox" checked />
+        Auto shuffle
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid" id="grid"></section>
+  </main>
+
+  <footer>
+    <div>Made with ❤️ — hosted on GitHub Pages.</div>
+    <div id="status">Loading…</div>
+  </footer>
+
+<script>
+  /**
+   * ✅ MIXED MEDIA LIST
+   * kind: "image" or "video"
+   * src: path to file
+   * date: shown in badge (YYYY-MM-DD formats nicely OR freeform label)
+   * poster (optional): image shown before video loads
+   */
+  const mediaItems = [
+    // Add your 30 photos + 15 videos here.
+    // Example entries:
+   const mediaItems = [
+  // =========================
+  // 30 PHOTOS (stills)
+  // =========================
+  { kind: "image", src: "photos/01.jpg", date: "2024-01-01" },
+  { kind: "image", src: "photos/02.jpg", date: "2024-01-02" },
+  { kind: "image", src: "photos/03.jpg", date: "2024-01-03" },
+  { kind: "image", src: "photos/04.jpg", date: "2024-01-04" },
+  { kind: "image", src: "photos/05.jpg", date: "2024-01-05" },
+  { kind: "image", src: "photos/06.jpg", date: "2024-01-06" },
+  { kind: "image", src: "photos/07.jpg", date: "2024-01-07" },
+  { kind: "image", src: "photos/08.jpg", date: "2024-01-08" },
+  { kind: "image", src: "photos/09.jpg", date: "2024-01-09" },
+  { kind: "image", src: "photos/10.jpg", date: "2024-01-10" },
+
+  { kind: "image", src: "photos/11.jpg", date: "2024-01-11" },
+  { kind: "image", src: "photos/12.jpg", date: "2024-01-12" },
+  { kind: "image", src: "photos/13.jpg", date: "2024-01-13" },
+  { kind: "image", src: "photos/14.jpg", date: "2024-01-14" },
+  { kind: "image", src: "photos/15.jpg", date: "2024-01-15" },
+  { kind: "image", src: "photos/16.jpg", date: "2024-01-16" },
+  { kind: "image", src: "photos/17.jpg", date: "2024-01-17" },
+  { kind: "image", src: "photos/18.jpg", date: "2024-01-18" },
+  { kind: "image", src: "photos/19.jpg", date: "2024-01-19" },
+  { kind: "image", src: "photos/20.jpg", date: "2024-01-20" },
+
+  { kind: "image", src: "photos/21.jpg", date: "2024-01-21" },
+  { kind: "image", src: "photos/22.jpg", date: "2024-01-22" },
+  { kind: "image", src: "photos/23.jpg", date: "2024-01-23" },
+  { kind: "image", src: "photos/24.jpg", date: "2024-01-24" },
+  { kind: "image", src: "photos/25.jpg", date: "2024-01-25" },
+  { kind: "image", src: "photos/26.jpg", date: "2024-01-26" },
+  { kind: "image", src: "photos/27.jpg", date: "2024-01-27" },
+  { kind: "image", src: "photos/28.jpg", date: "2024-01-28" },
+  { kind: "image", src: "photos/29.jpg", date: "2024-01-29" },
+  { kind: "image", src: "photos/30.jpg", date: "2024-01-30" },
+
+  // =========================
+  // 15 VIDEOS (live tiles)
+  // =========================
+  { kind: "video", src: "videos/01.mp4", poster: "posters/01.jpg", date: "2024-02-01" },
+  { kind: "video", src: "videos/02.mp4", poster: "posters/02.jpg", date: "2024-02-02" },
+  { kind: "video", src: "videos/03.mp4", poster: "posters/03.jpg", date: "2024-02-03" },
+  { kind: "video", src: "videos/04.mp4", poster: "posters/04.jpg", date: "2024-02-04" },
+  { kind: "video", src: "videos/05.mp4", poster: "posters/05.jpg", date: "2024-02-05" },
+
+  { kind: "video", src: "videos/06.mp4", poster: "posters/06.jpg", date: "2024-02-06" },
+  { kind: "video", src: "videos/07.mp4", poster: "posters/07.jpg", date: "2024-02-07" },
+  { kind: "video", src: "videos/08.mp4", poster: "posters/08.jpg", date: "2024-02-08" },
+  { kind: "video", src: "videos/09.mp4", poster: "posters/09.jpg", date: "2024-02-09" },
+  { kind: "video", src: "videos/10.mp4", poster: "posters/10.jpg", date: "2024-02-10" },
+
+  { kind: "video", src: "videos/11.mp4", poster: "posters/11.jpg", date: "2024-02-11" },
+  { kind: "video", src: "videos/12.mp4", poster: "posters/12.jpg", date: "2024-02-12" },
+  { kind: "video", src: "videos/13.mp4", poster: "posters/13.jpg", date: "2024-02-13" },
+  { kind: "video", src: "videos/14.mp4", poster: "posters/14.jpg", date: "2024-02-14" },
+  { kind: "video", src: "videos/15.mp4", poster: "posters/15.jpg", date: "2024-02-15" },
+];
+
+  // How many tiles visible in the collage at once
+  const TILE_COUNT = 12;
+
+  // Max video tiles visible at once (performance-friendly)
+  const MAX_VIDEO_TILES = 4;
+
+  // Auto shuffle interval (ms)
+  const AUTO_MS = 3500;
+
+  const grid = document.getElementById("grid");
+  const statusEl = document.getElementById("status");
+  const shuffleBtn = document.getElementById("shuffleBtn");
+  const refreshBtn = document.getElementById("refreshBtn");
+  const autoToggle = document.getElementById("autoToggle");
+
+  const layouts = ["large","wide","tall","medium","medium","tall","wide","medium","medium","medium","medium","medium"];
+  let autoTimer = null;
+
+  function shuffleArray(arr){
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function formatDateLabel(dateStr){
+    const iso = /^\d{4}-\d{2}-\d{2}$/;
+    if(!iso.test(dateStr)) return dateStr;
+    const [y,m,d] = dateStr.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+  }
+
+  function createMediaElement(item){
+    if(item.kind === "video"){
+      const v = document.createElement("video");
+      v.autoplay = true;
+      v.loop = true;
+      v.muted = true;
+      v.playsInline = true;
+      v.preload = "metadata";
+      if(item.poster) v.poster = item.poster;
+
+      const src = document.createElement("source");
+      src.src = item.src;
+      src.type = item.src.endsWith(".mp4") ? "video/mp4" : "video/quicktime";
+      v.appendChild(src);
+      return v;
+    }
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.alt = "Photo";
+    img.src = item.src;
+    return img;
+  }
+
+  function applyItemToTile(tile, item){
+    tile.dataset.kind = item.kind;
+    tile.dataset.src = item.src;
+
+    const oldMedia = tile.querySelector("img, video");
+    if(oldMedia) oldMedia.remove();
+
+    const media = createMediaElement(item);
+    tile.insertBefore(media, tile.firstChild);
+
+    const badge = tile.querySelector(".badge");
+    badge.textContent = formatDateLabel(item.date);
+
+    let hint = tile.querySelector(".videoHint");
+    if(item.kind === "video"){
+      if(!hint){
+        hint = document.createElement("div");
+        hint.className = "videoHint";
+        hint.textContent = "LIVE";
+        tile.appendChild(hint);
+      }
+    } else {
+      if(hint) hint.remove();
+    }
+  }
+
+  function pickCollageItems(){
+    const shuffled = shuffleArray([...mediaItems]);
+    let picked = shuffled.slice(0, TILE_COUNT);
+
+    let videos = picked.filter(x => x.kind === "video").length;
+    if(videos > MAX_VIDEO_TILES){
+      const nonPicked = shuffled.slice(TILE_COUNT);
+      for(let i = 0; i < picked.length && videos > MAX_VIDEO_TILES; i++){
+        if(picked[i].kind === "video"){
+          const replacement = nonPicked.find(x => x.kind === "image");
+          if(replacement){
+            picked[i] = replacement;
+            videos--;
+          }
+        }
+      }
+    }
+    return picked;
+  }
+
+  function buildGrid(){
+    grid.innerHTML = "";
+
+    if(!mediaItems.length){
+      statusEl.textContent = "Add your photos/videos to mediaItems to begin.";
+      return;
+    }
+
+    const picked = pickCollageItems();
+
+    picked.forEach((item, i) => {
+      const tile = document.createElement("div");
