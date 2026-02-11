@@ -180,5 +180,275 @@
       gap: 14px;
       flex-wrap: wrap;
     }
+  </style>
+</head>
 
+<body>
+  <header>
+    <div class="title">
+      <h1>Us 💙</h1>
+      <div class="subtitle">A collage of photos + “live” video moments.</div>
+    </div>
+
+    <div class="controls">
+      <button id="shuffleBtn">Shuffle now</button>
+      <button id="refreshBtn">New collage</button>
+      <label class="toggle" title="Auto shuffle every few seconds">
+        <input id="autoToggle" type="checkbox" checked />
+        Auto shuffle
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid" id="grid"></section>
+  </main>
+
+  <footer>
+    <div>Made with ❤️ — hosted on GitHub Pages.</div>
+    <div id="status">Loading…</div>
+  </footer>
+
+<script>
+  /**
+   * ✅ MIXED MEDIA LIST (TEST)
+   * Make sure these EXACT files exist in your repo:
+   * - photos/01.jpg
+   * - videos/01.MOV   (case-sensitive)
+   *
+   * If your video is 01.mov (lowercase), change it below to match.
+   */
+  const mediaItems = [
+    { kind: "image", src: "photos/01.jpg", date: "2025-07-25" },
+    { kind: "video", src: "videos/01.MOV", date: "2025-07-25" },
+  ];
+
+  // How many tiles visible in the collage at once
+  const TILE_COUNT = 12;
+
+  // Max video tiles visible at once (performance-friendly)
+  const MAX_VIDEO_TILES = 4;
+
+  // Auto shuffle interval (ms)
+  const AUTO_MS = 3500;
+
+  const grid = document.getElementById("grid");
+  const statusEl = document.getElementById("status");
+  const shuffleBtn = document.getElementById("shuffleBtn");
+  const refreshBtn = document.getElementById("refreshBtn");
+  const autoToggle = document.getElementById("autoToggle");
+
+  const layouts = ["large","wide","tall","medium","medium","tall","wide","medium","medium","medium","medium","medium"];
+  let autoTimer = null;
+
+  function shuffleArray(arr){
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function formatDateLabel(dateStr){
+    const iso = /^\d{4}-\d{2}-\d{2}$/;
+    if(!iso.test(dateStr)) return dateStr;
+    const [y,m,d] = dateStr.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+  }
+
+  function createMediaElement(item){
+    if(item.kind === "video"){
+      const v = document.createElement("video");
+      // Autoplay rules: muted + playsInline is required for iPhone Safari
+      v.autoplay = true;
+      v.loop = true;
+      v.muted = true;
+      v.playsInline = true;
+      v.preload = "metadata";
+
+      const src = document.createElement("source");
+      src.src = item.src;
+
+      // ✅ Handles .MOV/.mov/.MP4/.mp4
+      const ext = item.src.split(".").pop().toLowerCase();
+      src.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
+
+      v.appendChild(src);
+      return v;
+    }
+
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.alt = "Photo";
+    img.src = item.src;
+    return img;
+  }
+
+  function applyItemToTile(tile, item){
+    tile.dataset.kind = item.kind;
+    tile.dataset.src = item.src;
+
+    const oldMedia = tile.querySelector("img, video");
+    if(oldMedia) oldMedia.remove();
+
+    const media = createMediaElement(item);
+    tile.insertBefore(media, tile.firstChild);
+
+    const badge = tile.querySelector(".badge");
+    badge.textContent = formatDateLabel(item.date);
+
+    let hint = tile.querySelector(".videoHint");
+    if(item.kind === "video"){
+      if(!hint){
+        hint = document.createElement("div");
+        hint.className = "videoHint";
+        hint.textContent = "LIVE";
+        tile.appendChild(hint);
+      }
+    } else {
+      if(hint) hint.remove();
+    }
+  }
+
+  function pickCollageItems(){
+    const shuffled = shuffleArray([...mediaItems]);
+    let picked = shuffled.slice(0, TILE_COUNT);
+
+    // enforce max video tiles
+    let videos = picked.filter(x => x.kind === "video").length;
+    if(videos > MAX_VIDEO_TILES){
+      const nonPicked = shuffled.slice(TILE_COUNT);
+      for(let i = 0; i < picked.length && videos > MAX_VIDEO_TILES; i++){
+        if(picked[i].kind === "video"){
+          const replacement = nonPicked.find(x => x.kind === "image");
+          if(replacement){
+            picked[i] = replacement;
+            videos--;
+          }
+        }
+      }
+    }
+    return picked;
+  }
+
+  function buildGrid(){
+    grid.innerHTML = "";
+
+    if(!mediaItems.length){
+      statusEl.textContent = "Add your photos/videos to mediaItems to begin.";
+      return;
+    }
+
+    // If fewer items than TILE_COUNT, just show what we have
+    const picked = (mediaItems.length <= TILE_COUNT)
+      ? shuffleArray([...mediaItems])
+      : pickCollageItems();
+
+    picked.forEach((item, i) => {
+      const tile = document.createElement("div");
+      tile.className = `tile ${layouts[i % layouts.length]}`;
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+      badge.textContent = formatDateLabel(item.date);
+
+      tile.appendChild(badge);
+      grid.appendChild(tile);
+
+      applyItemToTile(tile, item);
+
+      // Tap/click: if autoplay is blocked, tap to play/pause
+      tile.addEventListener("click", () => {
+        const v = tile.querySelector("video");
+        if(v){
+          if(v.paused) v.play().catch(()=>{});
+          else v.pause();
+        }
+      });
+    });
+
+    statusEl.textContent = `Showing ${picked.length} tiles • max ${MAX_VIDEO_TILES} LIVE • ${new Date().toLocaleTimeString()}`;
+  }
+
+  function shuffleSomeTiles(){
+    const tiles = [...grid.querySelectorAll(".tile")];
+    if(!tiles.length) return;
+
+    // If only 1-2 items exist, swapping doesn't help much — just rebuild
+    if(mediaItems.length <= 2){
+      buildGrid();
+      return;
+    }
+
+    const swapCount = Math.max(2, Math.floor(tiles.length * 0.35));
+    const indices = shuffleArray([...Array(tiles.length).keys()]).slice(0, swapCount);
+
+    const shuffled = shuffleArray([...mediaItems]);
+
+    // Count current video tiles
+    const currentVideoCount = tiles.filter(t => t.dataset.kind === "video").length;
+    let nextVideoCount = currentVideoCount;
+
+    const replacements = [];
+    for(const item of shuffled){
+      if(replacements.length >= swapCount) break;
+      if(replacements.some(r => r.src === item.src)) continue;
+
+      if(item.kind === "video"){
+        if(nextVideoCount >= MAX_VIDEO_TILES) continue;
+        nextVideoCount++;
+      }
+      replacements.push(item);
+    }
+
+    // fallback fill with images
+    if(replacements.length < swapCount){
+      for(const item of shuffled){
+        if(replacements.length >= swapCount) break;
+        if(item.kind !== "image") continue;
+        if(replacements.some(r => r.src === item.src)) continue;
+        replacements.push(item);
+      }
+    }
+
+    indices.forEach((idx, k) => {
+      const tile = tiles[idx];
+      const media = tile.querySelector("img, video");
+      const next = replacements[k % replacements.length];
+      if(!media || !next) return;
+
+      media.classList.remove("fade-in");
+      media.classList.add("fade-out");
+
+      setTimeout(() => {
+        applyItemToTile(tile, next);
+        const newMedia = tile.querySelector("img, video");
+        newMedia.classList.remove("fade-out");
+        newMedia.classList.add("fade-in");
+      }, 330);
+    });
+
+    statusEl.textContent = `Shuffled ${swapCount} tiles • ${new Date().toLocaleTimeString()}`;
+  }
+
+  function startAuto(){
+    stopAuto();
+    autoTimer = setInterval(shuffleSomeTiles, AUTO_MS);
+  }
+  function stopAuto(){
+    if(autoTimer) clearInterval(autoTimer);
+    autoTimer = null;
+  }
+
+  shuffleBtn.addEventListener("click", shuffleSomeTiles);
+  refreshBtn.addEventListener("click", buildGrid);
+  autoToggle.addEventListener("change", (e) => e.target.checked ? startAuto() : stopAuto());
+
+  buildGrid();
+  startAuto();
+</script>
+</body>
+</html>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
