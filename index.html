@@ -16,6 +16,7 @@
       --shadow: 0 18px 50px rgba(0,0,0,.45);
     }
     *{ box-sizing: border-box; }
+
     body{
       margin:0;
       min-height: 100vh;
@@ -27,11 +28,20 @@
       color: var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       overflow-x: hidden;
+
+      /* iPhone safe areas */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
+
+    header, main, footer{
+      padding-left: max(18px, env(safe-area-inset-left));
+      padding-right: max(18px, env(safe-area-inset-right));
+    }
+
     header{
       max-width: 1100px;
-      margin: 32px auto 16px;
-      padding: 0 18px;
+      margin: 28px auto 12px;
       display:flex;
       align-items:flex-end;
       justify-content: space-between;
@@ -40,16 +50,22 @@
     .title{ display:flex; flex-direction:column; gap: 6px; }
     h1{
       margin:0;
-      font-size: clamp(26px, 3.2vw, 38px);
+      font-size: clamp(24px, 3.2vw, 38px);
       letter-spacing: -0.02em;
     }
-    .subtitle{ color: var(--muted); font-size: 14px; line-height: 1.4; }
+    .subtitle{
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+      max-width: 46ch;
+    }
 
     .controls{
       display:flex;
       gap: 10px;
       flex-wrap: wrap;
       justify-content: flex-end;
+      align-items: center;
     }
     button{
       appearance:none;
@@ -63,6 +79,7 @@
       box-shadow: 0 10px 25px rgba(0,0,0,.25);
       font-weight: 600;
       font-size: 13px;
+      white-space: nowrap;
     }
     button:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
     button:active{ transform: translateY(0px) scale(.98); }
@@ -78,18 +95,20 @@
       font-size: 13px;
       color: var(--muted);
       user-select:none;
+      white-space: nowrap;
     }
     .toggle input{
       width: 18px; height: 18px;
-      accent-color: #ffd9a0;
+      accent-color: #9fe3ff;
       cursor:pointer;
     }
 
     main{
       max-width: 1100px;
-      margin: 0 auto 40px;
-      padding: 0 18px 30px;
+      margin: 0 auto 30px;
+      padding-bottom: 22px;
     }
+
     .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
@@ -104,32 +123,64 @@
       border: 1px solid rgba(255,255,255,.08);
       box-shadow: var(--shadow);
       transform: translateZ(0);
-      aspect-ratio: 1 / 1;
       cursor: pointer;
+      aspect-ratio: 1 / 1;
     }
+
+    /* Desktop collage spans */
     .tile.large{ grid-column: span 6; grid-row: span 2; aspect-ratio: 3 / 2; }
     .tile.wide{ grid-column: span 6; aspect-ratio: 16 / 9; }
     .tile.tall{ grid-column: span 3; grid-row: span 2; aspect-ratio: 3 / 4; }
     .tile.medium{ grid-column: span 3; aspect-ratio: 1 / 1; }
 
+    /* Tablet */
     @media (max-width: 900px){
       .tile.large{ grid-column: span 12; }
       .tile.wide{ grid-column: span 12; }
       .tile.tall{ grid-column: span 6; }
       .tile.medium{ grid-column: span 6; }
     }
+
+    /* Phone: bigger tiles, fewer columns */
     @media (max-width: 520px){
-      .tile.tall{ grid-column: span 12; }
-      .tile.medium{ grid-column: span 12; }
+      .grid{
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+      }
+      .tile.large{ grid-column: span 6; grid-row: span 2; }
+      .tile.wide{ grid-column: span 6; }
+      .tile.tall{ grid-column: span 3; grid-row: span 2; }
+      .tile.medium{ grid-column: span 3; }
     }
 
+    /* SHOW ENTIRE PHOTO/VIDEO (no cropping) */
     img, video{
       width:100%;
       height:100%;
-      object-fit: cover;
+      object-fit: contain;      /* ✅ no cut-off */
+      object-position: center;
       display:block;
-      transform: scale(1.02);
-      filter: saturate(1.05) contrast(1.03);
+      background: rgba(0,0,0,.20);
+    }
+
+    /* Blurred background fill behind the media so contain still looks “full” */
+    .tile.blur-bg::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image: var(--bgimg);
+      background-size: cover;
+      background-position: center;
+      filter: blur(18px) brightness(.80);
+      transform: scale(1.25);
+      z-index:0;
+    }
+    .tile > img,
+    .tile > video,
+    .tile > .badge,
+    .tile > .videoHint{
+      position: relative;
+      z-index: 1;
     }
 
     .badge{
@@ -166,15 +217,19 @@
       letter-spacing: .02em;
     }
 
+    /* Smooth but not intense */
     .fade-out{ animation: fadeOut .35s ease forwards; }
     .fade-in{ animation: fadeIn .45s ease forwards; }
-    @keyframes fadeOut{ to{ opacity:0; transform: scale(1.04); } }
-    @keyframes fadeIn{ from{ opacity:0; transform: scale(1.04); } to{ opacity:1; transform: scale(1.02); } }
+    @keyframes fadeOut{ to{ opacity:0; } }
+    @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+
+    @media (prefers-reduced-motion: reduce){
+      .fade-out, .fade-in{ animation: none !important; }
+    }
 
     footer{
       max-width: 1100px;
-      margin: 10px auto 30px;
-      padding: 0 18px;
+      margin: 10px auto 26px;
       color: rgba(255,255,255,.55);
       font-size: 12px;
       display:flex;
@@ -189,15 +244,15 @@
   <header>
     <div class="title">
       <h1>Us 💙</h1>
-      <div class="subtitle">A collage of photos + “live” video moments.</div>
+      <div class="subtitle">Bigger tiles, iPhone-friendly, and a timeline that advances from oldest → newest.</div>
     </div>
 
     <div class="controls">
       <button id="shuffleBtn">Shuffle now</button>
       <button id="refreshBtn">New collage</button>
-      <label class="toggle" title="Auto shuffle every few seconds">
+      <label class="toggle" title="Auto advance every few seconds">
         <input id="autoToggle" type="checkbox" checked />
-        Auto shuffle
+        Auto
       </label>
     </div>
   </header>
@@ -213,10 +268,10 @@
 
 <script>
   // =========================
-  // YOUR MEDIA LIST (kept as-is)
+  // YOUR MEDIA LIST (kept with your dates)
   // =========================
   const mediaItems = [
-    // Photos (as you provided)
+    // Photos
     { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
     { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
     { kind: "image", src: "photos/03.jpg", date: "2025-9-2" },
@@ -271,7 +326,7 @@
     { kind: "image", src: "photos/51.jpg", date: "2025-12-26" },
     { kind: "image", src: "photos/53.jpg", date: "2025-10-30" },
 
-    // Videos (as you provided)
+    // Videos
     { kind: "video", src: "videos/01.MOV", poster: "photos/01.jpg", date: "2025-10-25" },
     { kind: "video", src: "videos/21.MOV", poster: "photos/21.jpg", date: "2025-10-12" },
     { kind: "video", src: "videos/22.MOV", poster: "photos/22.jpg", date: "2025-10-12" },
@@ -288,15 +343,22 @@
   ];
 
   // =========================
-  // SETTINGS
+  // SETTINGS (slower + bigger tiles on iPhone)
   // =========================
-  const TILE_COUNT = 12;
-  const MAX_VIDEO_TILES = 4;
-  const AUTO_MS = 3500;
+  // Calm timeline speed
+  const AUTO_MS = 9000;       // ✅ slower (9 seconds)
+  const SWAP_FRACTION = 0.20; // ✅ fewer swaps (20%) = less chaotic
 
-  // Timeline (Option 1): oldest -> newest
-  const TIMELINE_MODE = "asc"; // oldest -> newest
-  const SWAP_FRACTION = 0.35;
+  // Adaptive tile count: bigger tiles on phones
+  function getTileCount(){
+    return window.matchMedia("(max-width: 520px)").matches ? 8 : 12;
+  }
+  function getMaxVideoTiles(){
+    return window.matchMedia("(max-width: 520px)").matches ? 2 : 4;
+  }
+
+  // Timeline oldest → newest
+  const TIMELINE_MODE = "asc";
   let timelineIndex = 0;
 
   const grid = document.getElementById("grid");
@@ -305,11 +367,46 @@
   const refreshBtn = document.getElementById("refreshBtn");
   const autoToggle = document.getElementById("autoToggle");
 
-  const layouts = ["large","wide","tall","medium","medium","tall","wide","medium","medium","medium","medium","medium"];
+  const layoutsDesktop = ["large","wide","tall","medium","medium","tall","wide","medium","medium","medium","medium","medium"];
+  const layoutsPhone   = ["large","wide","tall","medium","medium","wide","tall","medium"]; // fewer tiles = simpler layout
   let autoTimer = null;
 
+  function layoutsForScreen(){
+    return window.matchMedia("(max-width: 520px)").matches ? layoutsPhone : layoutsDesktop;
+  }
+
   // =========================
-  // HELPERS
+  // DATE NORMALIZATION (your "2025-7-2" still sorts correctly)
+  // =========================
+  function normalizeDate(dateStr){
+    if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
+    if(!m) return dateStr;
+    const y = m[1];
+    const mm = String(parseInt(m[2], 10)).padStart(2, "0");
+    const dd = String(parseInt(m[3], 10)).padStart(2, "0");
+    return `${y}-${mm}-${dd}`;
+  }
+
+  function dateKey(dateStr){
+    const normalized = normalizeDate(dateStr);
+    const iso = /^\d{4}-\d{2}-\d{2}$/;
+    if(!iso.test(normalized)) return Number.POSITIVE_INFINITY;
+    const [y,m,d] = normalized.split("-").map(Number);
+    return new Date(y, m-1, d).getTime();
+  }
+
+  function formatDateLabel(dateStr){
+    const normalized = normalizeDate(dateStr);
+    const iso = /^\d{4}-\d{2}-\d{2}$/;
+    if(!iso.test(normalized)) return dateStr;
+    const [y,m,d] = normalized.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+  }
+
+  // =========================
+  // GENERAL HELPERS
   // =========================
   function shuffleArray(arr){
     for(let i = arr.length - 1; i > 0; i--){
@@ -317,39 +414,6 @@
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
-  }
-
-  // Normalize dates like "2025-7-2" -> "2025-07-02"
-  function normalizeDate(dateStr){
-    // Already ISO?
-    if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-
-    // Accept "YYYY-M-D" or "YYYY-MM-D" etc.
-    const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
-    if(!m) return dateStr; // leave it as-is (won't sort properly)
-    const y = m[1];
-    const mm = String(parseInt(m[2], 10)).padStart(2, "0");
-    const dd = String(parseInt(m[3], 10)).padStart(2, "0");
-    return `${y}-${mm}-${dd}`;
-  }
-
-  function formatDateLabel(dateStr){
-    const normalized = normalizeDate(dateStr);
-    const iso = /^\d{4}-\d{2}-\d{2}$/;
-    if(!iso.test(normalized)) return dateStr; // show original text if not a date
-
-    const [y,m,d] = normalized.split("-").map(Number);
-    const dt = new Date(y, m-1, d);
-    return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
-  }
-
-  // Timeline sorting key
-  function dateKey(dateStr){
-    const normalized = normalizeDate(dateStr);
-    const iso = /^\d{4}-\d{2}-\d{2}$/;
-    if(!iso.test(normalized)) return Number.POSITIVE_INFINITY;
-    const [y,m,d] = normalized.split("-").map(Number);
-    return new Date(y, m-1, d).getTime();
   }
 
   function getSortedItems(){
@@ -380,7 +444,6 @@
       const source = document.createElement("source");
       source.src = item.src;
 
-      // Works for .MOV/.mov/.MP4/.mp4
       const ext = item.src.split(".").pop().toLowerCase();
       source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
 
@@ -399,6 +462,11 @@
   function applyItemToTile(tile, item){
     tile.dataset.kind = item.kind;
     tile.dataset.src = item.src;
+
+    // blurred backdrop image (poster for video, src for image)
+    const bgSource = item.poster || item.src;
+    tile.classList.add("blur-bg");
+    tile.style.setProperty("--bgimg", `url("${bgSource}")`);
 
     const oldMedia = tile.querySelector("img, video");
     if(oldMedia) oldMedia.remove();
@@ -423,7 +491,7 @@
   }
 
   // =========================
-  // TIMELINE BUILD + ADVANCE
+  // TIMELINE BUILD + ADVANCE (oldest → newest)
   // =========================
   function buildGrid(){
     grid.innerHTML = "";
@@ -432,9 +500,12 @@
       return;
     }
 
-    timelineIndex = 0; // restart timeline
-    const count = Math.min(TILE_COUNT, mediaItems.length);
-    const picked = getNextTimelineChunk(count);
+    timelineIndex = 0;
+
+    const TILE_COUNT = getTileCount();
+    const layouts = layoutsForScreen();
+
+    const picked = getNextTimelineChunk(Math.min(TILE_COUNT, mediaItems.length));
 
     picked.forEach((item, i) => {
       const tile = document.createElement("div");
@@ -449,7 +520,7 @@
 
       applyItemToTile(tile, item);
 
-      // Tap/click to play/pause video tiles if autoplay is blocked
+      // tap/click to play/pause (helps if autoplay is blocked)
       tile.addEventListener("click", () => {
         const v = tile.querySelector("video");
         if(v){
@@ -459,19 +530,21 @@
       });
     });
 
-    statusEl.textContent = `Timeline oldest → newest • showing ${count} • ${new Date().toLocaleTimeString()}`;
+    statusEl.textContent = `Timeline (oldest → newest) • showing ${picked.length} • ${new Date().toLocaleTimeString()}`;
   }
 
   function advanceTimeline(){
     const tiles = [...grid.querySelectorAll(".tile")];
     if(!tiles.length) return;
 
+    const MAX_VIDEO_TILES = getMaxVideoTiles();
+
     const swapCount = Math.max(1, Math.floor(tiles.length * SWAP_FRACTION));
     const indices = shuffleArray([...Array(tiles.length).keys()]).slice(0, swapCount);
 
     let replacements = getNextTimelineChunk(swapCount);
 
-    // Enforce MAX_VIDEO_TILES
+    // Enforce max visible video tiles for performance
     const currentVideoCount = tiles.filter(t => t.dataset.kind === "video").length;
     const roomForVideos = Math.max(0, MAX_VIDEO_TILES - currentVideoCount);
     const imagePool = getSortedItems().filter(x => x.kind === "image");
@@ -519,7 +592,7 @@
       }, 330);
     });
 
-    statusEl.textContent = `Advancing oldest → newest • swapped ${swapCount} • ${new Date().toLocaleTimeString()}`;
+    statusEl.textContent = `Advancing timeline • swapped ${swapCount} • ${new Date().toLocaleTimeString()}`;
   }
 
   function startAuto(){
@@ -531,10 +604,17 @@
     autoTimer = null;
   }
 
-  // Buttons: keep your labels but change behavior to timeline
+  // Buttons keep their labels, but act as timeline controls:
   shuffleBtn.addEventListener("click", advanceTimeline);
   refreshBtn.addEventListener("click", buildGrid);
   autoToggle.addEventListener("change", (e) => e.target.checked ? startAuto() : stopAuto());
+
+  // Rebuild if screen rotates / resizes (so tiles stay big on iPhone)
+  window.addEventListener("resize", () => {
+    // quick debounce via timeout
+    clearTimeout(window.__resizeTimer);
+    window.__resizeTimer = setTimeout(buildGrid, 200);
+  });
 
   buildGrid();
   startAuto();
