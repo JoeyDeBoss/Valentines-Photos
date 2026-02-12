@@ -1,7 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
- title>Us 💙</title>  <meta charset="utf-8" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Us 💙</title>
 
   <style>
     :root{
@@ -210,27 +212,92 @@
   </footer>
 
 <script>
-  /**
-   * ✅ MIXED MEDIA LIST (TEST)
-   * Make sure these EXACT files exist in your repo:
-   * - photos/01.jpg
-   * - videos/01.MOV   (case-sensitive)
-   *
-   * If your video is 01.mov (lowercase), change it below to match.
-   */
+  // =========================
+  // YOUR MEDIA LIST (kept as-is)
+  // =========================
   const mediaItems = [
-    { kind: "image", src: "photos/01.jpg", date: "2025-07-25" },
-    { kind: "video", src: "videos/01.MOV", date: "2025-07-25" },
+    // Photos (as you provided)
+    { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
+    { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
+    { kind: "image", src: "photos/03.jpg", date: "2025-9-2" },
+    { kind: "image", src: "photos/04.jpg", date: "2025-9-7" },
+    { kind: "image", src: "photos/05.jpg", date: "2025-9-7" },
+    { kind: "image", src: "photos/06.jpg", date: "2025-11-3" },
+    { kind: "image", src: "photos/06(2).jpg", date: "2025-11-3" },
+    { kind: "image", src: "photos/07.jpg", date: "2025-11-3" },
+    { kind: "image", src: "photos/08.jpg", date: "2025-11-3" },
+    { kind: "image", src: "photos/09.jpg", date: "2025-12-14" },
+    { kind: "image", src: "photos/10.jpg", date: "2025-12-14" },
+    { kind: "image", src: "photos/11.jpg", date: "2025-9-17" },
+    { kind: "image", src: "photos/12.jpg", date: "2024-12-1" },
+    { kind: "image", src: "photos/13.jpg", date: "2025-10-23" },
+    { kind: "image", src: "photos/14.jpg", date: "2025-1-5" },
+    { kind: "image", src: "photos/15.jpg", date: "2025-11-10" },
+    { kind: "image", src: "photos/16.jpg", date: "2025-10-13" },
+    { kind: "image", src: "photos/17.jpg", date: "2025-9-22" },
+    { kind: "image", src: "photos/18.jpg", date: "2025-9-22" },
+    { kind: "image", src: "photos/19.jpg", date: "2025-9-23" },
+    { kind: "image", src: "photos/20.jpg", date: "2025-9-23" },
+    { kind: "image", src: "photos/21.jpg", date: "2025-10-12" },
+    { kind: "image", src: "photos/22.jpg", date: "2025-10-12" },
+    { kind: "image", src: "photos/23.jpg", date: "2025-10-12" },
+    { kind: "image", src: "photos/24.jpg", date: "2025-10-13" },
+    { kind: "image", src: "photos/25.jpg", date: "2025-10-13" },
+    { kind: "image", src: "photos/26.jpg", date: "2025-10-13" },
+    { kind: "image", src: "photos/27.jpg", date: "2025-10-13" },
+    { kind: "image", src: "photos/28.jpg", date: "2025-10-13" },
+    { kind: "image", src: "photos/29.jpg", date: "2025-10-13" },
+    { kind: "image", src: "photos/30.jpg", date: "2025-10-15" },
+    { kind: "image", src: "photos/31.jpg", date: "2025-10-16" },
+    { kind: "image", src: "photos/32.jpg", date: "2025-10-18" },
+    { kind: "image", src: "photos/33.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/34.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/35.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/36.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/37.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/38.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/39.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/40.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/41.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/42.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/43.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/44.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/45.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/46.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/47.jpg", date: "2025-10-31" },
+    { kind: "image", src: "photos/48.jpg", date: "2025-10-31" },
+    { kind: "image", src: "photos/49.jpg", date: "2025-10-25" },
+    { kind: "image", src: "photos/50.jpg", date: "2025-11-17" },
+    { kind: "image", src: "photos/51.jpg", date: "2025-12-26" },
+    { kind: "image", src: "photos/53.jpg", date: "2025-10-30" },
+
+    // Videos (as you provided)
+    { kind: "video", src: "videos/01.MOV", poster: "photos/01.jpg", date: "2025-10-25" },
+    { kind: "video", src: "videos/21.MOV", poster: "photos/21.jpg", date: "2025-10-12" },
+    { kind: "video", src: "videos/22.MOV", poster: "photos/22.jpg", date: "2025-10-12" },
+    { kind: "video", src: "videos/25.MOV", poster: "photos/25.jpg", date: "2025-10-13" },
+    { kind: "video", src: "videos/26.MOV", poster: "photos/26.jpg", date: "2025-10-13" },
+    { kind: "video", src: "videos/27.MOV", poster: "photos/27.jpg", date: "2025-10-13" },
+    { kind: "video", src: "videos/29.MOV", poster: "photos/29.jpg", date: "2025-10-13" },
+    { kind: "video", src: "videos/40.MOV", poster: "photos/40.jpg", date: "2025-10-25" },
+    { kind: "video", src: "videos/09.MOV", poster: "photos/09.jpg", date: "2025-12-14" },
+    { kind: "video", src: "videos/10.MOV", poster: "photos/10.jpg", date: "2025-12-14" },
+    { kind: "video", src: "videos/42.MOV", poster: "photos/42.jpg", date: "2025-10-25" },
+    { kind: "video", src: "videos/44.MOV", poster: "photos/44.jpg", date: "2025-10-25" },
+    { kind: "video", src: "videos/02.MP4", poster: "photos/13.jpg", date: "2025-10-17" },
   ];
 
-  // How many tiles visible in the collage at once
+  // =========================
+  // SETTINGS
+  // =========================
   const TILE_COUNT = 12;
-
-  // Max video tiles visible at once (performance-friendly)
   const MAX_VIDEO_TILES = 4;
-
-  // Auto shuffle interval (ms)
   const AUTO_MS = 3500;
+
+  // Timeline (Option 1): oldest -> newest
+  const TIMELINE_MODE = "asc"; // oldest -> newest
+  const SWAP_FRACTION = 0.35;
+  let timelineIndex = 0;
 
   const grid = document.getElementById("grid");
   const statusEl = document.getElementById("status");
@@ -241,6 +308,9 @@
   const layouts = ["large","wide","tall","medium","medium","tall","wide","medium","medium","medium","medium","medium"];
   let autoTimer = null;
 
+  // =========================
+  // HELPERS
+  // =========================
   function shuffleArray(arr){
     for(let i = arr.length - 1; i > 0; i--){
       const j = Math.floor(Math.random() * (i + 1));
@@ -249,32 +319,72 @@
     return arr;
   }
 
+  // Normalize dates like "2025-7-2" -> "2025-07-02"
+  function normalizeDate(dateStr){
+    // Already ISO?
+    if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+
+    // Accept "YYYY-M-D" or "YYYY-MM-D" etc.
+    const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
+    if(!m) return dateStr; // leave it as-is (won't sort properly)
+    const y = m[1];
+    const mm = String(parseInt(m[2], 10)).padStart(2, "0");
+    const dd = String(parseInt(m[3], 10)).padStart(2, "0");
+    return `${y}-${mm}-${dd}`;
+  }
+
   function formatDateLabel(dateStr){
+    const normalized = normalizeDate(dateStr);
     const iso = /^\d{4}-\d{2}-\d{2}$/;
-    if(!iso.test(dateStr)) return dateStr;
-    const [y,m,d] = dateStr.split("-").map(Number);
+    if(!iso.test(normalized)) return dateStr; // show original text if not a date
+
+    const [y,m,d] = normalized.split("-").map(Number);
     const dt = new Date(y, m-1, d);
     return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+  }
+
+  // Timeline sorting key
+  function dateKey(dateStr){
+    const normalized = normalizeDate(dateStr);
+    const iso = /^\d{4}-\d{2}-\d{2}$/;
+    if(!iso.test(normalized)) return Number.POSITIVE_INFINITY;
+    const [y,m,d] = normalized.split("-").map(Number);
+    return new Date(y, m-1, d).getTime();
+  }
+
+  function getSortedItems(){
+    const sorted = [...mediaItems].sort((a,b) => dateKey(a.date) - dateKey(b.date));
+    return (TIMELINE_MODE === "desc") ? sorted.reverse() : sorted;
+  }
+
+  function getNextTimelineChunk(n){
+    const sorted = getSortedItems();
+    const chunk = [];
+    for(let i = 0; i < n; i++){
+      chunk.push(sorted[(timelineIndex + i) % sorted.length]);
+    }
+    timelineIndex = (timelineIndex + n) % sorted.length;
+    return chunk;
   }
 
   function createMediaElement(item){
     if(item.kind === "video"){
       const v = document.createElement("video");
-      // Autoplay rules: muted + playsInline is required for iPhone Safari
       v.autoplay = true;
       v.loop = true;
       v.muted = true;
       v.playsInline = true;
       v.preload = "metadata";
+      if(item.poster) v.poster = item.poster;
 
-      const src = document.createElement("source");
-      src.src = item.src;
+      const source = document.createElement("source");
+      source.src = item.src;
 
-      // ✅ Handles .MOV/.mov/.MP4/.mp4
+      // Works for .MOV/.mov/.MP4/.mp4
       const ext = item.src.split(".").pop().toLowerCase();
-      src.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
+      source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
 
-      v.appendChild(src);
+      v.appendChild(source);
       return v;
     }
 
@@ -312,39 +422,19 @@
     }
   }
 
-  function pickCollageItems(){
-    const shuffled = shuffleArray([...mediaItems]);
-    let picked = shuffled.slice(0, TILE_COUNT);
-
-    // enforce max video tiles
-    let videos = picked.filter(x => x.kind === "video").length;
-    if(videos > MAX_VIDEO_TILES){
-      const nonPicked = shuffled.slice(TILE_COUNT);
-      for(let i = 0; i < picked.length && videos > MAX_VIDEO_TILES; i++){
-        if(picked[i].kind === "video"){
-          const replacement = nonPicked.find(x => x.kind === "image");
-          if(replacement){
-            picked[i] = replacement;
-            videos--;
-          }
-        }
-      }
-    }
-    return picked;
-  }
-
+  // =========================
+  // TIMELINE BUILD + ADVANCE
+  // =========================
   function buildGrid(){
     grid.innerHTML = "";
-
     if(!mediaItems.length){
       statusEl.textContent = "Add your photos/videos to mediaItems to begin.";
       return;
     }
 
-    // If fewer items than TILE_COUNT, just show what we have
-    const picked = (mediaItems.length <= TILE_COUNT)
-      ? shuffleArray([...mediaItems])
-      : pickCollageItems();
+    timelineIndex = 0; // restart timeline
+    const count = Math.min(TILE_COUNT, mediaItems.length);
+    const picked = getNextTimelineChunk(count);
 
     picked.forEach((item, i) => {
       const tile = document.createElement("div");
@@ -359,7 +449,7 @@
 
       applyItemToTile(tile, item);
 
-      // Tap/click: if autoplay is blocked, tap to play/pause
+      // Tap/click to play/pause video tiles if autoplay is blocked
       tile.addEventListener("click", () => {
         const v = tile.querySelector("video");
         if(v){
@@ -369,54 +459,53 @@
       });
     });
 
-    statusEl.textContent = `Showing ${picked.length} tiles • max ${MAX_VIDEO_TILES} LIVE • ${new Date().toLocaleTimeString()}`;
+    statusEl.textContent = `Timeline oldest → newest • showing ${count} • ${new Date().toLocaleTimeString()}`;
   }
 
-  function shuffleSomeTiles(){
+  function advanceTimeline(){
     const tiles = [...grid.querySelectorAll(".tile")];
     if(!tiles.length) return;
 
-    // If only 1-2 items exist, swapping doesn't help much — just rebuild
-    if(mediaItems.length <= 2){
-      buildGrid();
-      return;
-    }
-
-    const swapCount = Math.max(2, Math.floor(tiles.length * 0.35));
+    const swapCount = Math.max(1, Math.floor(tiles.length * SWAP_FRACTION));
     const indices = shuffleArray([...Array(tiles.length).keys()]).slice(0, swapCount);
 
-    const shuffled = shuffleArray([...mediaItems]);
+    let replacements = getNextTimelineChunk(swapCount);
 
-    // Count current video tiles
+    // Enforce MAX_VIDEO_TILES
     const currentVideoCount = tiles.filter(t => t.dataset.kind === "video").length;
-    let nextVideoCount = currentVideoCount;
+    const roomForVideos = Math.max(0, MAX_VIDEO_TILES - currentVideoCount);
+    const imagePool = getSortedItems().filter(x => x.kind === "image");
 
-    const replacements = [];
-    for(const item of shuffled){
-      if(replacements.length >= swapCount) break;
-      if(replacements.some(r => r.src === item.src)) continue;
-
-      if(item.kind === "video"){
-        if(nextVideoCount >= MAX_VIDEO_TILES) continue;
-        nextVideoCount++;
-      }
-      replacements.push(item);
-    }
-
-    // fallback fill with images
-    if(replacements.length < swapCount){
-      for(const item of shuffled){
-        if(replacements.length >= swapCount) break;
-        if(item.kind !== "image") continue;
-        if(replacements.some(r => r.src === item.src)) continue;
-        replacements.push(item);
-      }
+    if(roomForVideos <= 0){
+      let imgIdx = 0;
+      replacements = replacements.map(item => {
+        if(item.kind === "video" && imagePool.length){
+          const fallback = imagePool[imgIdx % imagePool.length];
+          imgIdx++;
+          return fallback;
+        }
+        return item;
+      });
+    } else {
+      let usedVideos = 0;
+      let imgIdx = 0;
+      replacements = replacements.map(item => {
+        if(item.kind === "video"){
+          if(usedVideos >= roomForVideos && imagePool.length){
+            const fallback = imagePool[imgIdx % imagePool.length];
+            imgIdx++;
+            return fallback;
+          }
+          usedVideos++;
+        }
+        return item;
+      });
     }
 
     indices.forEach((idx, k) => {
       const tile = tiles[idx];
       const media = tile.querySelector("img, video");
-      const next = replacements[k % replacements.length];
+      const next = replacements[k];
       if(!media || !next) return;
 
       media.classList.remove("fade-in");
@@ -430,19 +519,20 @@
       }, 330);
     });
 
-    statusEl.textContent = `Shuffled ${swapCount} tiles • ${new Date().toLocaleTimeString()}`;
+    statusEl.textContent = `Advancing oldest → newest • swapped ${swapCount} • ${new Date().toLocaleTimeString()}`;
   }
 
   function startAuto(){
     stopAuto();
-    autoTimer = setInterval(shuffleSomeTiles, AUTO_MS);
+    autoTimer = setInterval(advanceTimeline, AUTO_MS);
   }
   function stopAuto(){
     if(autoTimer) clearInterval(autoTimer);
     autoTimer = null;
   }
 
-  shuffleBtn.addEventListener("click", shuffleSomeTiles);
+  // Buttons: keep your labels but change behavior to timeline
+  shuffleBtn.addEventListener("click", advanceTimeline);
   refreshBtn.addEventListener("click", buildGrid);
   autoToggle.addEventListener("change", (e) => e.target.checked ? startAuto() : stopAuto());
 
@@ -451,4 +541,3 @@
 </script>
 </body>
 </html>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
