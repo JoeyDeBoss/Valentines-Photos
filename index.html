@@ -10,9 +10,16 @@
       --bg: #0b0d12;
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.72);
-      --radius: 18px;
-      --shadow: 0 14px 40px rgba(0,0,0,.38);
+
+      --paper: #f7f7f5;          /* polaroid frame */
+      --paper2: #ffffff;
+      --ink: rgba(0,0,0,.78);
+      --shadow: 0 18px 55px rgba(0,0,0,.40);
+      --shadow2: 0 10px 30px rgba(0,0,0,.32);
+
+      --radius: 16px;
     }
+
     *{ box-sizing: border-box; }
 
     body{
@@ -20,7 +27,7 @@
       min-height: 100vh;
       background:
         radial-gradient(1200px 700px at 20% 10%, rgba(255, 205, 165, .14), transparent 60%),
-        radial-gradient(1000px 600px at 90% 40%, rgba(176, 220, 255, .14), transparent 55%),
+        radial-gradient(1000px 600px at 90% 40%, rgba(176, 220, 255, .12), transparent 55%),
         radial-gradient(900px 600px at 50% 90%, rgba(190, 255, 210, .08), transparent 55%),
         var(--bg);
       color: var(--text);
@@ -55,7 +62,7 @@
     .subtitle{
       color: var(--muted);
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.35;
       max-width: 52ch;
     }
 
@@ -69,19 +76,19 @@
 
     button{
       appearance:none;
-      border: none;                 /* ✅ remove border frame look */
-      background: rgba(255,255,255,.08);
+      border: none;
+      background: rgba(255,255,255,.10);
       color: var(--text);
       padding: 10px 12px;
       border-radius: 999px;
       cursor:pointer;
       transition: transform .12s ease, background .2s ease;
-      box-shadow: 0 10px 25px rgba(0,0,0,.22);
+      box-shadow: 0 10px 22px rgba(0,0,0,.22);
       font-weight: 650;
       font-size: 13px;
       white-space: nowrap;
     }
-    button:hover{ transform: translateY(-1px); background: rgba(255,255,255,.11); }
+    button:hover{ transform: translateY(-1px); background: rgba(255,255,255,.14); }
     button:active{ transform: translateY(0px) scale(.98); }
 
     .toggle{
@@ -91,9 +98,9 @@
       padding: 8px 12px;
       border-radius: 999px;
       border: none;
-      background: rgba(255,255,255,.08);
+      background: rgba(255,255,255,.10);
       font-size: 13px;
-      color: rgba(255,255,255,.80);
+      color: rgba(255,255,255,.82);
       user-select:none;
       white-space: nowrap;
     }
@@ -109,119 +116,120 @@
       padding-bottom: 18px;
     }
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 12px;
+    /* POLAROID "TABLE" */
+    .board{
+      position: relative;
+      width: 100%;
+      min-height: 72vh;
+      border-radius: 22px;
+      /* subtle vignette */
+      background:
+        radial-gradient(700px 420px at 30% 30%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(800px 500px at 80% 55%, rgba(255,255,255,.05), transparent 60%);
+      overflow: hidden;
+      padding: 8px;
     }
 
-    /* Clean tile: no border */
-    .tile{
-      position:relative;
-      border-radius: var(--radius);
-      overflow:hidden;
-      background: rgba(255,255,255,.02);
-      border: none;                 /* ✅ remove “box border” */
-      box-shadow: var(--shadow);    /* ✅ soft shadow only */
-      transform: translateZ(0);
-      cursor: pointer;
-      aspect-ratio: 1 / 1;
-    }
-
-    /* Desktop collage spans */
-    .tile.large{ grid-column: span 6; grid-row: span 2; aspect-ratio: 3 / 2; }
-    .tile.wide{  grid-column: span 6; aspect-ratio: 16 / 9; }
-    .tile.tall{  grid-column: span 3; grid-row: span 2; aspect-ratio: 3 / 4; }
-    .tile.medium{grid-column: span 3; aspect-ratio: 1 / 1; }
-
-    /* Tablet */
-    @media (max-width: 900px){
-      .tile.large{ grid-column: span 12; }
-      .tile.wide{  grid-column: span 12; }
-      .tile.tall{  grid-column: span 6; }
-      .tile.medium{grid-column: span 6; }
-    }
-
-    /* ✅ Phone: BIGGER tiles, easier to see */
+    /* On iPhone, ensure board height feels right */
     @media (max-width: 520px){
       header{
         align-items: flex-start;
         flex-direction: column;
       }
       .controls{ justify-content: flex-start; }
-
-      .grid{
-        grid-template-columns: repeat(2, 1fr); /* ✅ simple 2-col grid */
-        gap: 10px;
-      }
-
-      /* Make everything span full width on phone for clarity */
-      .tile.large,
-      .tile.wide,
-      .tile.medium{
-        grid-column: span 2;
-        aspect-ratio: 4 / 3;       /* bigger, more viewable */
-      }
-      .tile.tall{
-        grid-column: span 2;
-        aspect-ratio: 3 / 4;       /* portrait-friendly big tile */
+      .board{
+        min-height: 74vh;
       }
     }
 
-    /* ✅ Fill tile better: no letterboxing */
-    img, video{
+    /* POLAROID CARD */
+    .polaroid{
+      position: absolute;
+      width: var(--w);
+      height: var(--h);
+      left: var(--x);
+      top: var(--y);
+      transform: rotate(var(--r));
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--paper2), var(--paper));
+      box-shadow: var(--shadow);
+      padding: 10px 10px 16px;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      opacity: 1;
+      transition:
+        left .55s ease,
+        top .55s ease,
+        transform .55s ease,
+        opacity .35s ease;
+    }
+
+    /* a tiny “paper edge” */
+    .polaroid::after{
+      content:"";
+      position:absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+      pointer-events:none;
+    }
+
+    .mediaSlot{
+      width: 100%;
+      height: calc(100% - 38px);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #111;
+      box-shadow: var(--shadow2);
+    }
+
+    /* fill like a real printed photo */
+    .mediaSlot img,
+    .mediaSlot video{
       width:100%;
       height:100%;
-      object-fit: cover;           /* ✅ fills screen better */
-      object-position: center;     /* centered crop */
+      object-fit: cover;   /* looks best for polaroids */
+      object-position: center;
       display:block;
-      transform: scale(1.02);      /* tiny zoom for “premium” feel */
-      filter: saturate(1.06) contrast(1.03);
     }
 
-    .badge{
-      position:absolute;
-      left: 10px;
-      bottom: 10px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
+    .caption{
+      margin-top: 10px;
+      display:flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--ink);
       font-weight: 750;
-      color: rgba(255,255,255,.92);
-      background: rgba(0,0,0,.44);
-      border: none;               /* ✅ remove badge border too */
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      text-shadow: 0 1px 8px rgba(0,0,0,.35);
       letter-spacing: .01em;
+      /* “handwritten-ish” fallback */
+      font-family: ui-rounded, "Segoe Print", "Bradley Hand", "Comic Sans MS", system-ui, sans-serif;
     }
 
-    .videoHint{
-      position:absolute;
-      right: 10px;
-      bottom: 10px;
-      padding: 6px 10px;
+    .tag{
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      color: rgba(0,0,0,.60);
+    }
+
+    /* video badge */
+    .live{
+      padding: 4px 8px;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 850;
-      color: rgba(255,255,255,.92);
-      background: rgba(0,0,0,.44);
-      border: none;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      text-shadow: 0 1px 8px rgba(0,0,0,.35);
-      letter-spacing: .02em;
+      background: rgba(0,0,0,.10);
+      border: 1px solid rgba(0,0,0,.10);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
     }
 
-    /* Smooth swaps */
-    .fade-out{ animation: fadeOut .28s ease forwards; }
-    .fade-in{  animation: fadeIn .40s ease forwards; }
-    @keyframes fadeOut{ to{ opacity:0; } }
-    @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
-
-    @media (prefers-reduced-motion: reduce){
-      .fade-out, .fade-in{ animation: none !important; }
-    }
+    /* nicer fading when swapped */
+    .swapOut{ opacity: 0; }
+    .swapIn{ opacity: 1; }
 
     footer{
       max-width: 1100px;
@@ -233,6 +241,10 @@
       gap: 14px;
       flex-wrap: wrap;
     }
+
+    @media (prefers-reduced-motion: reduce){
+      .polaroid{ transition: none !important; }
+    }
   </style>
 </head>
 
@@ -240,7 +252,9 @@
   <header>
     <div class="title">
       <h1>Us 💙</h1>
-      <div class="subtitle">Timeline collage (oldest → newest). Bigger tiles on iPhone, calmer shuffling.</div>
+      <div class="subtitle">
+        Polaroid collage style — overlapping cards that advance through time (oldest → newest).
+      </div>
     </div>
 
     <div class="controls">
@@ -254,7 +268,7 @@
   </header>
 
   <main>
-    <section class="grid" id="grid"></section>
+    <section class="board" id="board" aria-label="Polaroid collage"></section>
   </main>
 
   <footer>
@@ -339,44 +353,33 @@
   ];
 
   // =========================
-  // SETTINGS (slower, more noticeable swaps)
+  // TIMELINE + SPEED SETTINGS
   // =========================
-  const AUTO_MS = 8500;        // ✅ slower than before but still lively
-  const SWAP_FRACTION = 0.34;  // ✅ swap ~1/3 each time so you SEE it
-  const TIMELINE_MODE = "asc"; // oldest -> newest
-
+  const TIMELINE_MODE = "asc";      // oldest -> newest
+  const AUTO_MS = 9500;            // slower, cozy
+  const SWAP_FRACTION = 0.40;      // make swaps obvious
   let timelineIndex = 0;
 
-  const grid = document.getElementById("grid");
+  const board = document.getElementById("board");
   const statusEl = document.getElementById("status");
   const shuffleBtn = document.getElementById("shuffleBtn");
   const refreshBtn = document.getElementById("refreshBtn");
   const autoToggle = document.getElementById("autoToggle");
   let autoTimer = null;
 
-  // Layout patterns (phone uses fewer tiles → bigger)
-  const layoutsDesktop = ["large","wide","tall","medium","medium","tall","wide","medium","medium","medium","medium","medium"];
-  const layoutsPhone   = ["large","tall","wide","medium","tall","wide"]; // simple + big
-
   function isPhone(){
     return window.matchMedia("(max-width: 520px)").matches;
   }
 
-  function getTileCount(){
-    return isPhone() ? 6 : 12;      // ✅ bigger tiles on iPhone
+  // Bigger polaroids on phone; show fewer
+  function getCardCount(){
+    return isPhone() ? 6 : 10;
+  }
+  function getMaxVideoCards(){
+    return isPhone() ? 2 : 3;
   }
 
-  function getMaxVideoTiles(){
-    return isPhone() ? 2 : 4;       // ✅ keep iPhone smooth
-  }
-
-  function layoutsForScreen(){
-    return isPhone() ? layoutsPhone : layoutsDesktop;
-  }
-
-  // =========================
-  // DATE NORMALIZATION (your "2025-7-25" sorts correctly)
-  // =========================
+  // Normalize dates like "2025-7-2" -> "2025-07-02" for sorting
   function normalizeDate(dateStr){
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
@@ -388,23 +391,20 @@
   }
 
   function dateKey(dateStr){
-    const normalized = normalizeDate(dateStr);
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return Number.POSITIVE_INFINITY;
-    const [y,m,d] = normalized.split("-").map(Number);
-    return new Date(y, m-1, d).getTime();
+    const d = normalizeDate(dateStr);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return Number.POSITIVE_INFINITY;
+    const [y,m,dd] = d.split("-").map(Number);
+    return new Date(y, m-1, dd).getTime();
   }
 
   function formatDateLabel(dateStr){
-    const normalized = normalizeDate(dateStr);
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return dateStr;
-    const [y,m,d] = normalized.split("-").map(Number);
-    const dt = new Date(y, m-1, d);
+    const d = normalizeDate(dateStr);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return dateStr;
+    const [y,m,dd] = d.split("-").map(Number);
+    const dt = new Date(y, m-1, dd);
     return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
   }
 
-  // =========================
-  // HELPERS
-  // =========================
   function shuffleArray(arr){
     for(let i = arr.length - 1; i > 0; i--){
       const j = Math.floor(Math.random() * (i + 1));
@@ -428,7 +428,75 @@
     return chunk;
   }
 
-  function createMediaElement(item){
+  // Random positions & rotation to feel like a real collage (but keep inside board)
+  function randomLayout(count){
+    const rect = board.getBoundingClientRect();
+    const pad = isPhone() ? 10 : 16;
+
+    // Card sizes (bigger on phone)
+    const w = isPhone() ? Math.min(260, rect.width - 2*pad) : 280;
+    const h = isPhone() ? Math.min(340, rect.height - 2*pad) : 330;
+
+    const layouts = [];
+    for(let i = 0; i < count; i++){
+      const x = pad + Math.random() * Math.max(1, rect.width  - w - 2*pad);
+      const y = pad + Math.random() * Math.max(1, rect.height - h - 2*pad);
+      const r = (Math.random() * 18 - 9); // -9..+9 degrees
+      const z = 10 + i;
+      layouts.push({ x, y, r, w, h, z });
+    }
+    return layouts;
+  }
+
+  function createPolaroid(item){
+    const card = document.createElement("div");
+    card.className = "polaroid swapIn";
+    card.dataset.kind = item.kind;
+    card.dataset.src  = item.src;
+
+    const mediaSlot = document.createElement("div");
+    mediaSlot.className = "mediaSlot";
+
+    const caption = document.createElement("div");
+    caption.className = "caption";
+
+    const dateEl = document.createElement("div");
+    dateEl.textContent = formatDateLabel(item.date);
+
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = item.kind === "video" ? "" : "";
+
+    caption.appendChild(dateEl);
+    caption.appendChild(tag);
+
+    card.appendChild(mediaSlot);
+    card.appendChild(caption);
+
+    setMediaIntoCard(card, item);
+
+    // tap/click for video play/pause
+    card.addEventListener("click", () => {
+      const v = card.querySelector("video");
+      if(v){
+        if(v.paused) v.play().catch(()=>{});
+        else v.pause();
+      }
+    });
+
+    return card;
+  }
+
+  function setMediaIntoCard(card, item){
+    const mediaSlot = card.querySelector(".mediaSlot");
+    mediaSlot.innerHTML = "";
+
+    const captionDate = card.querySelector(".caption > div:first-child");
+    captionDate.textContent = formatDateLabel(item.date);
+
+    const captionTag = card.querySelector(".tag");
+    captionTag.textContent = item.kind === "video" ? "LIVE" : "";
+
     if(item.kind === "video"){
       const v = document.createElement("video");
       v.autoplay = true;
@@ -443,167 +511,147 @@
       const ext = item.src.split(".").pop().toLowerCase();
       source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
       v.appendChild(source);
-      return v;
-    }
 
-    const img = document.createElement("img");
-    img.loading = "lazy";
-    img.decoding = "async";
-    img.alt = "Photo";
-    img.src = item.src;
-    return img;
-  }
+      mediaSlot.appendChild(v);
 
-  function applyItemToTile(tile, item){
-    tile.dataset.kind = item.kind;
-    tile.dataset.src = item.src;
-
-    const oldMedia = tile.querySelector("img, video");
-    if(oldMedia) oldMedia.remove();
-
-    const media = createMediaElement(item);
-    tile.insertBefore(media, tile.firstChild);
-
-    const badge = tile.querySelector(".badge");
-    badge.textContent = formatDateLabel(item.date);
-
-    let hint = tile.querySelector(".videoHint");
-    if(item.kind === "video"){
-      if(!hint){
-        hint = document.createElement("div");
-        hint.className = "videoHint";
-        hint.textContent = "LIVE";
-        tile.appendChild(hint);
+      // show LIVE pill (bottom right)
+      let live = card.querySelector(".live");
+      if(!live){
+        live = document.createElement("div");
+        live.className = "live";
+        live.textContent = "LIVE";
+        card.querySelector(".caption").appendChild(live);
       }
     } else {
-      if(hint) hint.remove();
+      const img = document.createElement("img");
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.alt = "Photo";
+      img.src = item.src;
+      mediaSlot.appendChild(img);
+
+      const live = card.querySelector(".live");
+      if(live) live.remove();
     }
+
+    card.dataset.kind = item.kind;
+    card.dataset.src  = item.src;
   }
 
-  // =========================
-  // TIMELINE BUILD + ADVANCE
-  // =========================
-  function buildGrid(){
-    grid.innerHTML = "";
-    if(!mediaItems.length){
-      statusEl.textContent = "Add your photos/videos to mediaItems to begin.";
-      return;
-    }
+  function applyLayout(card, layout){
+    card.style.setProperty("--x", `${layout.x}px`);
+    card.style.setProperty("--y", `${layout.y}px`);
+    card.style.setProperty("--r", `${layout.r}deg`);
+    card.style.setProperty("--w", `${layout.w}px`);
+    card.style.setProperty("--h", `${layout.h}px`);
+    card.style.zIndex = layout.z;
+  }
 
+  function buildBoard(){
+    board.innerHTML = "";
     timelineIndex = 0;
 
-    const TILE_COUNT = getTileCount();
-    const layouts = layoutsForScreen();
+    const count = Math.min(getCardCount(), mediaItems.length);
+    const picked = getNextTimelineChunk(count);
 
-    const picked = getNextTimelineChunk(Math.min(TILE_COUNT, mediaItems.length));
-
+    const layouts = randomLayout(count);
     picked.forEach((item, i) => {
-      const tile = document.createElement("div");
-      tile.className = `tile ${layouts[i % layouts.length]}`;
-
-      const badge = document.createElement("div");
-      badge.className = "badge";
-      badge.textContent = formatDateLabel(item.date);
-
-      tile.appendChild(badge);
-      grid.appendChild(tile);
-
-      applyItemToTile(tile, item);
-
-      tile.addEventListener("click", () => {
-        const v = tile.querySelector("video");
-        if(v){
-          if(v.paused) v.play().catch(()=>{});
-          else v.pause();
-        }
-      });
+      const card = createPolaroid(item);
+      applyLayout(card, layouts[i]);
+      board.appendChild(card);
     });
 
-    statusEl.textContent = `Timeline oldest → newest • showing ${picked.length} tiles`;
+    statusEl.textContent = `Polaroid collage • oldest → newest • showing ${count}`;
   }
 
   function advanceTimeline(){
-    const tiles = [...grid.querySelectorAll(".tile")];
-    if(!tiles.length) return;
+    const cards = [...board.querySelectorAll(".polaroid")];
+    if(!cards.length) return;
 
-    const MAX_VIDEO_TILES = getMaxVideoTiles();
-    const swapCount = Math.max(2, Math.floor(tiles.length * SWAP_FRACTION)); // ✅ noticeable
-    const indices = shuffleArray([...Array(tiles.length).keys()]).slice(0, swapCount);
+    const maxVideos = getMaxVideoCards();
+    const currentVideoCount = cards.filter(c => c.dataset.kind === "video").length;
+    const roomForVideos = Math.max(0, maxVideos - currentVideoCount);
+
+    const swapCount = Math.max(2, Math.floor(cards.length * SWAP_FRACTION));
+    const indices = shuffleArray([...Array(cards.length).keys()]).slice(0, swapCount);
 
     let replacements = getNextTimelineChunk(swapCount);
 
-    // Enforce max visible video tiles (especially on iPhone)
-    const currentVideoCount = tiles.filter(t => t.dataset.kind === "video").length;
-    const roomForVideos = Math.max(0, MAX_VIDEO_TILES - currentVideoCount);
+    // enforce video count
     const imagePool = getSortedItems().filter(x => x.kind === "image");
-
     if(roomForVideos <= 0){
       let imgIdx = 0;
-      replacements = replacements.map(item => {
-        if(item.kind === "video" && imagePool.length){
-          const fallback = imagePool[imgIdx % imagePool.length];
-          imgIdx++;
-          return fallback;
-        }
-        return item;
-      });
+      replacements = replacements.map(it => (it.kind === "video" && imagePool.length)
+        ? imagePool[(imgIdx++) % imagePool.length]
+        : it
+      );
     } else {
       let usedVideos = 0;
       let imgIdx = 0;
-      replacements = replacements.map(item => {
-        if(item.kind === "video"){
+      replacements = replacements.map(it => {
+        if(it.kind === "video"){
           if(usedVideos >= roomForVideos && imagePool.length){
-            const fallback = imagePool[imgIdx % imagePool.length];
-            imgIdx++;
-            return fallback;
+            return imagePool[(imgIdx++) % imagePool.length];
           }
           usedVideos++;
         }
-        return item;
+        return it;
       });
     }
 
-    indices.forEach((idx, k) => {
-      const tile = tiles[idx];
-      const media = tile.querySelector("img, video");
-      const next = replacements[k];
-      if(!media || !next) return;
+    // new random layout for the whole “shake”
+    const newLayouts = randomLayout(cards.length);
 
-      media.classList.remove("fade-in");
-      media.classList.add("fade-out");
+    indices.forEach((idx, k) => {
+      const card = cards[idx];
+      card.classList.add("swapOut");
 
       setTimeout(() => {
-        applyItemToTile(tile, next);
-        const newMedia = tile.querySelector("img, video");
-        newMedia.classList.remove("fade-out");
-        newMedia.classList.add("fade-in");
-      }, 250);
+        // swap content
+        const next = replacements[k];
+        setMediaIntoCard(card, next);
+
+        // pop it to the top visually
+        card.style.zIndex = 999 + idx;
+
+        // reposition/rotate
+        applyLayout(card, newLayouts[idx]);
+
+        card.classList.remove("swapOut");
+        card.classList.add("swapIn");
+      }, 220);
     });
 
-    statusEl.textContent = `Advancing timeline • swapped ${swapCount} tiles`;
+    // also gently rearrange non-swapped cards for a natural collage “shift”
+    cards.forEach((card, i) => {
+      if(!indices.includes(i)){
+        applyLayout(card, newLayouts[i]);
+      }
+    });
+
+    statusEl.textContent = `Advancing timeline • swapped ${swapCount} polaroids`;
   }
 
   function startAuto(){
     stopAuto();
     autoTimer = setInterval(advanceTimeline, AUTO_MS);
   }
-
   function stopAuto(){
     if(autoTimer) clearInterval(autoTimer);
     autoTimer = null;
   }
 
   shuffleBtn.addEventListener("click", advanceTimeline);
-  refreshBtn.addEventListener("click", buildGrid);
+  refreshBtn.addEventListener("click", buildBoard);
   autoToggle.addEventListener("change", (e) => e.target.checked ? startAuto() : stopAuto());
 
-  // Rebuild on rotate/resize so iPhone always gets big tiles
+  // Rebuild on rotate/resize so phone layout stays nice
   window.addEventListener("resize", () => {
     clearTimeout(window.__resizeTimer);
-    window.__resizeTimer = setTimeout(buildGrid, 200);
+    window.__resizeTimer = setTimeout(buildBoard, 200);
   });
 
-  buildGrid();
+  buildBoard();
   startAuto();
 </script>
 </body>
