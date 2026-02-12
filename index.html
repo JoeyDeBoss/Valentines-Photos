@@ -8,12 +8,10 @@
   <style>
     :root{
       --bg: #0b0d12;
-      --card: rgba(255,255,255,.06);
-      --stroke: rgba(255,255,255,.10);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.72);
       --radius: 18px;
-      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --shadow: 0 14px 40px rgba(0,0,0,.38);
     }
     *{ box-sizing: border-box; }
 
@@ -21,9 +19,9 @@
       margin:0;
       min-height: 100vh;
       background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(255, 205, 165, .18), transparent 60%),
-        radial-gradient(1000px 600px at 90% 40%, rgba(176, 220, 255, .16), transparent 55%),
-        radial-gradient(900px 600px at 50% 90%, rgba(190, 255, 210, .10), transparent 55%),
+        radial-gradient(1200px 700px at 20% 10%, rgba(255, 205, 165, .14), transparent 60%),
+        radial-gradient(1000px 600px at 90% 40%, rgba(176, 220, 255, .14), transparent 55%),
+        radial-gradient(900px 600px at 50% 90%, rgba(190, 255, 210, .08), transparent 55%),
         var(--bg);
       color: var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
@@ -35,18 +33,19 @@
     }
 
     header, main, footer{
-      padding-left: max(18px, env(safe-area-inset-left));
-      padding-right: max(18px, env(safe-area-inset-right));
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right: max(16px, env(safe-area-inset-right));
     }
 
     header{
       max-width: 1100px;
-      margin: 28px auto 12px;
+      margin: 26px auto 10px;
       display:flex;
       align-items:flex-end;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
     }
+
     .title{ display:flex; flex-direction:column; gap: 6px; }
     h1{
       margin:0;
@@ -57,7 +56,7 @@
       color: var(--muted);
       font-size: 14px;
       line-height: 1.4;
-      max-width: 46ch;
+      max-width: 52ch;
     }
 
     .controls{
@@ -65,23 +64,24 @@
       gap: 10px;
       flex-wrap: wrap;
       justify-content: flex-end;
-      align-items: center;
+      align-items:center;
     }
+
     button{
       appearance:none;
-      border: 1px solid var(--stroke);
-      background: var(--card);
+      border: none;                 /* ✅ remove border frame look */
+      background: rgba(255,255,255,.08);
       color: var(--text);
       padding: 10px 12px;
       border-radius: 999px;
       cursor:pointer;
-      transition: transform .12s ease, background .2s ease, border-color .2s ease;
-      box-shadow: 0 10px 25px rgba(0,0,0,.25);
-      font-weight: 600;
+      transition: transform .12s ease, background .2s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,.22);
+      font-weight: 650;
       font-size: 13px;
       white-space: nowrap;
     }
-    button:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
+    button:hover{ transform: translateY(-1px); background: rgba(255,255,255,.11); }
     button:active{ transform: translateY(0px) scale(.98); }
 
     .toggle{
@@ -90,10 +90,10 @@
       gap: 8px;
       padding: 8px 12px;
       border-radius: 999px;
-      border: 1px solid var(--stroke);
-      background: var(--card);
+      border: none;
+      background: rgba(255,255,255,.08);
       font-size: 13px;
-      color: var(--muted);
+      color: rgba(255,255,255,.80);
       user-select:none;
       white-space: nowrap;
     }
@@ -105,8 +105,8 @@
 
     main{
       max-width: 1100px;
-      margin: 0 auto 30px;
-      padding-bottom: 22px;
+      margin: 0 auto 26px;
+      padding-bottom: 18px;
     }
 
     .grid{
@@ -115,13 +115,14 @@
       gap: 12px;
     }
 
+    /* Clean tile: no border */
     .tile{
       position:relative;
       border-radius: var(--radius);
       overflow:hidden;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: var(--shadow);
+      background: rgba(255,255,255,.02);
+      border: none;                 /* ✅ remove “box border” */
+      box-shadow: var(--shadow);    /* ✅ soft shadow only */
       transform: translateZ(0);
       cursor: pointer;
       aspect-ratio: 1 / 1;
@@ -129,58 +130,53 @@
 
     /* Desktop collage spans */
     .tile.large{ grid-column: span 6; grid-row: span 2; aspect-ratio: 3 / 2; }
-    .tile.wide{ grid-column: span 6; aspect-ratio: 16 / 9; }
-    .tile.tall{ grid-column: span 3; grid-row: span 2; aspect-ratio: 3 / 4; }
-    .tile.medium{ grid-column: span 3; aspect-ratio: 1 / 1; }
+    .tile.wide{  grid-column: span 6; aspect-ratio: 16 / 9; }
+    .tile.tall{  grid-column: span 3; grid-row: span 2; aspect-ratio: 3 / 4; }
+    .tile.medium{grid-column: span 3; aspect-ratio: 1 / 1; }
 
     /* Tablet */
     @media (max-width: 900px){
       .tile.large{ grid-column: span 12; }
-      .tile.wide{ grid-column: span 12; }
-      .tile.tall{ grid-column: span 6; }
-      .tile.medium{ grid-column: span 6; }
+      .tile.wide{  grid-column: span 12; }
+      .tile.tall{  grid-column: span 6; }
+      .tile.medium{grid-column: span 6; }
     }
 
-    /* Phone: bigger tiles, fewer columns */
+    /* ✅ Phone: BIGGER tiles, easier to see */
     @media (max-width: 520px){
+      header{
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .controls{ justify-content: flex-start; }
+
       .grid{
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(2, 1fr); /* ✅ simple 2-col grid */
         gap: 10px;
       }
-      .tile.large{ grid-column: span 6; grid-row: span 2; }
-      .tile.wide{ grid-column: span 6; }
-      .tile.tall{ grid-column: span 3; grid-row: span 2; }
-      .tile.medium{ grid-column: span 3; }
+
+      /* Make everything span full width on phone for clarity */
+      .tile.large,
+      .tile.wide,
+      .tile.medium{
+        grid-column: span 2;
+        aspect-ratio: 4 / 3;       /* bigger, more viewable */
+      }
+      .tile.tall{
+        grid-column: span 2;
+        aspect-ratio: 3 / 4;       /* portrait-friendly big tile */
+      }
     }
 
-    /* SHOW ENTIRE PHOTO/VIDEO (no cropping) */
+    /* ✅ Fill tile better: no letterboxing */
     img, video{
       width:100%;
       height:100%;
-      object-fit: contain;      /* ✅ no cut-off */
-      object-position: center;
+      object-fit: cover;           /* ✅ fills screen better */
+      object-position: center;     /* centered crop */
       display:block;
-      background: rgba(0,0,0,.20);
-    }
-
-    /* Blurred background fill behind the media so contain still looks “full” */
-    .tile.blur-bg::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background-image: var(--bgimg);
-      background-size: cover;
-      background-position: center;
-      filter: blur(18px) brightness(.80);
-      transform: scale(1.25);
-      z-index:0;
-    }
-    .tile > img,
-    .tile > video,
-    .tile > .badge,
-    .tile > .videoHint{
-      position: relative;
-      z-index: 1;
+      transform: scale(1.02);      /* tiny zoom for “premium” feel */
+      filter: saturate(1.06) contrast(1.03);
     }
 
     .badge{
@@ -190,12 +186,12 @@
       padding: 6px 10px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 750;
       color: rgba(255,255,255,.92);
-      background: rgba(0,0,0,.45);
-      border: 1px solid rgba(255,255,255,.20);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      background: rgba(0,0,0,.44);
+      border: none;               /* ✅ remove badge border too */
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       text-shadow: 0 1px 8px rgba(0,0,0,.35);
       letter-spacing: .01em;
     }
@@ -207,19 +203,19 @@
       padding: 6px 10px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 850;
       color: rgba(255,255,255,.92);
-      background: rgba(0,0,0,.45);
-      border: 1px solid rgba(255,255,255,.20);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      background: rgba(0,0,0,.44);
+      border: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       text-shadow: 0 1px 8px rgba(0,0,0,.35);
       letter-spacing: .02em;
     }
 
-    /* Smooth but not intense */
-    .fade-out{ animation: fadeOut .35s ease forwards; }
-    .fade-in{ animation: fadeIn .45s ease forwards; }
+    /* Smooth swaps */
+    .fade-out{ animation: fadeOut .28s ease forwards; }
+    .fade-in{  animation: fadeIn .40s ease forwards; }
     @keyframes fadeOut{ to{ opacity:0; } }
     @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
 
@@ -229,7 +225,7 @@
 
     footer{
       max-width: 1100px;
-      margin: 10px auto 26px;
+      margin: 10px auto 24px;
       color: rgba(255,255,255,.55);
       font-size: 12px;
       display:flex;
@@ -244,7 +240,7 @@
   <header>
     <div class="title">
       <h1>Us 💙</h1>
-      <div class="subtitle">Bigger tiles, iPhone-friendly, and a timeline that advances from oldest → newest.</div>
+      <div class="subtitle">Timeline collage (oldest → newest). Bigger tiles on iPhone, calmer shuffling.</div>
     </div>
 
     <div class="controls">
@@ -343,22 +339,12 @@
   ];
 
   // =========================
-  // SETTINGS (slower + bigger tiles on iPhone)
+  // SETTINGS (slower, more noticeable swaps)
   // =========================
-  // Calm timeline speed
-  const AUTO_MS = 9000;       // ✅ slower (9 seconds)
-  const SWAP_FRACTION = 0.20; // ✅ fewer swaps (20%) = less chaotic
+  const AUTO_MS = 8500;        // ✅ slower than before but still lively
+  const SWAP_FRACTION = 0.34;  // ✅ swap ~1/3 each time so you SEE it
+  const TIMELINE_MODE = "asc"; // oldest -> newest
 
-  // Adaptive tile count: bigger tiles on phones
-  function getTileCount(){
-    return window.matchMedia("(max-width: 520px)").matches ? 8 : 12;
-  }
-  function getMaxVideoTiles(){
-    return window.matchMedia("(max-width: 520px)").matches ? 2 : 4;
-  }
-
-  // Timeline oldest → newest
-  const TIMELINE_MODE = "asc";
   let timelineIndex = 0;
 
   const grid = document.getElementById("grid");
@@ -366,17 +352,30 @@
   const shuffleBtn = document.getElementById("shuffleBtn");
   const refreshBtn = document.getElementById("refreshBtn");
   const autoToggle = document.getElementById("autoToggle");
-
-  const layoutsDesktop = ["large","wide","tall","medium","medium","tall","wide","medium","medium","medium","medium","medium"];
-  const layoutsPhone   = ["large","wide","tall","medium","medium","wide","tall","medium"]; // fewer tiles = simpler layout
   let autoTimer = null;
 
+  // Layout patterns (phone uses fewer tiles → bigger)
+  const layoutsDesktop = ["large","wide","tall","medium","medium","tall","wide","medium","medium","medium","medium","medium"];
+  const layoutsPhone   = ["large","tall","wide","medium","tall","wide"]; // simple + big
+
+  function isPhone(){
+    return window.matchMedia("(max-width: 520px)").matches;
+  }
+
+  function getTileCount(){
+    return isPhone() ? 6 : 12;      // ✅ bigger tiles on iPhone
+  }
+
+  function getMaxVideoTiles(){
+    return isPhone() ? 2 : 4;       // ✅ keep iPhone smooth
+  }
+
   function layoutsForScreen(){
-    return window.matchMedia("(max-width: 520px)").matches ? layoutsPhone : layoutsDesktop;
+    return isPhone() ? layoutsPhone : layoutsDesktop;
   }
 
   // =========================
-  // DATE NORMALIZATION (your "2025-7-2" still sorts correctly)
+  // DATE NORMALIZATION (your "2025-7-25" sorts correctly)
   // =========================
   function normalizeDate(dateStr){
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
@@ -390,23 +389,21 @@
 
   function dateKey(dateStr){
     const normalized = normalizeDate(dateStr);
-    const iso = /^\d{4}-\d{2}-\d{2}$/;
-    if(!iso.test(normalized)) return Number.POSITIVE_INFINITY;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return Number.POSITIVE_INFINITY;
     const [y,m,d] = normalized.split("-").map(Number);
     return new Date(y, m-1, d).getTime();
   }
 
   function formatDateLabel(dateStr){
     const normalized = normalizeDate(dateStr);
-    const iso = /^\d{4}-\d{2}-\d{2}$/;
-    if(!iso.test(normalized)) return dateStr;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return dateStr;
     const [y,m,d] = normalized.split("-").map(Number);
     const dt = new Date(y, m-1, d);
     return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
   }
 
   // =========================
-  // GENERAL HELPERS
+  // HELPERS
   // =========================
   function shuffleArray(arr){
     for(let i = arr.length - 1; i > 0; i--){
@@ -443,10 +440,8 @@
 
       const source = document.createElement("source");
       source.src = item.src;
-
       const ext = item.src.split(".").pop().toLowerCase();
       source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
-
       v.appendChild(source);
       return v;
     }
@@ -462,11 +457,6 @@
   function applyItemToTile(tile, item){
     tile.dataset.kind = item.kind;
     tile.dataset.src = item.src;
-
-    // blurred backdrop image (poster for video, src for image)
-    const bgSource = item.poster || item.src;
-    tile.classList.add("blur-bg");
-    tile.style.setProperty("--bgimg", `url("${bgSource}")`);
 
     const oldMedia = tile.querySelector("img, video");
     if(oldMedia) oldMedia.remove();
@@ -491,7 +481,7 @@
   }
 
   // =========================
-  // TIMELINE BUILD + ADVANCE (oldest → newest)
+  // TIMELINE BUILD + ADVANCE
   // =========================
   function buildGrid(){
     grid.innerHTML = "";
@@ -520,7 +510,6 @@
 
       applyItemToTile(tile, item);
 
-      // tap/click to play/pause (helps if autoplay is blocked)
       tile.addEventListener("click", () => {
         const v = tile.querySelector("video");
         if(v){
@@ -530,7 +519,7 @@
       });
     });
 
-    statusEl.textContent = `Timeline (oldest → newest) • showing ${picked.length} • ${new Date().toLocaleTimeString()}`;
+    statusEl.textContent = `Timeline oldest → newest • showing ${picked.length} tiles`;
   }
 
   function advanceTimeline(){
@@ -538,13 +527,12 @@
     if(!tiles.length) return;
 
     const MAX_VIDEO_TILES = getMaxVideoTiles();
-
-    const swapCount = Math.max(1, Math.floor(tiles.length * SWAP_FRACTION));
+    const swapCount = Math.max(2, Math.floor(tiles.length * SWAP_FRACTION)); // ✅ noticeable
     const indices = shuffleArray([...Array(tiles.length).keys()]).slice(0, swapCount);
 
     let replacements = getNextTimelineChunk(swapCount);
 
-    // Enforce max visible video tiles for performance
+    // Enforce max visible video tiles (especially on iPhone)
     const currentVideoCount = tiles.filter(t => t.dataset.kind === "video").length;
     const roomForVideos = Math.max(0, MAX_VIDEO_TILES - currentVideoCount);
     const imagePool = getSortedItems().filter(x => x.kind === "image");
@@ -589,29 +577,28 @@
         const newMedia = tile.querySelector("img, video");
         newMedia.classList.remove("fade-out");
         newMedia.classList.add("fade-in");
-      }, 330);
+      }, 250);
     });
 
-    statusEl.textContent = `Advancing timeline • swapped ${swapCount} • ${new Date().toLocaleTimeString()}`;
+    statusEl.textContent = `Advancing timeline • swapped ${swapCount} tiles`;
   }
 
   function startAuto(){
     stopAuto();
     autoTimer = setInterval(advanceTimeline, AUTO_MS);
   }
+
   function stopAuto(){
     if(autoTimer) clearInterval(autoTimer);
     autoTimer = null;
   }
 
-  // Buttons keep their labels, but act as timeline controls:
   shuffleBtn.addEventListener("click", advanceTimeline);
   refreshBtn.addEventListener("click", buildGrid);
   autoToggle.addEventListener("change", (e) => e.target.checked ? startAuto() : stopAuto());
 
-  // Rebuild if screen rotates / resizes (so tiles stay big on iPhone)
+  // Rebuild on rotate/resize so iPhone always gets big tiles
   window.addEventListener("resize", () => {
-    // quick debounce via timeout
     clearTimeout(window.__resizeTimer);
     window.__resizeTimer = setTimeout(buildGrid, 200);
   });
