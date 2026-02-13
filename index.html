@@ -3,21 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Us 💙</title>
+  <title>Us 🩵</title>
 
   <style>
     :root{
-      --bg: #07080c;                 /* darker page background */
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.72);
+      --bg: #050612;
+      --text: rgba(255,255,255,.94);
+      --muted: rgba(255,255,255,.78);
 
       --paper: #f7f7f5;
       --paper2: #ffffff;
-      --ink: rgba(0,0,0,.78);
+      --ink: rgba(0,0,0,.80);
 
       --radius: 16px;
-      --shadow: 0 16px 45px rgba(0,0,0,.42);
+      --shadow: 0 16px 45px rgba(0,0,0,.46);
       --shadow2: 0 10px 26px rgba(0,0,0,.30);
+
+      /* dynamic background image */
+      --bg-photo: none;
+      --bg-photo-opacity: .30;
+
+      /* glow */
+      --glow: 0 0 18px rgba(120, 210, 255, .25);
+      --glow-strong: 0 0 24px rgba(120, 210, 255, .40);
     }
 
     *{ box-sizing: border-box; }
@@ -25,17 +33,66 @@
     body{
       margin:0;
       min-height: 100vh;
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(64, 170, 255, .10), transparent 60%),
-        radial-gradient(1000px 600px at 90% 40%, rgba(255, 150, 200, .07), transparent 55%),
-        radial-gradient(900px 600px at 50% 90%, rgba(120, 255, 200, .06), transparent 55%),
-        var(--bg);
       color: var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       overflow-x: hidden;
 
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
+
+      background: var(--bg);
+      position: relative;
+      isolation: isolate;
+    }
+
+    /* Photo background (from your images/videos posters) */
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      background-image: var(--bg-photo);
+      background-size: cover;
+      background-position: center;
+      filter: blur(18px) saturate(1.12) contrast(1.05);
+      opacity: var(--bg-photo-opacity);
+      transform: scale(1.12);
+      transition: opacity .7s ease;
+    }
+
+    /* Dark overlay to make text readable */
+    body::after{
+      content:"";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(900px 520px at 30% 20%, rgba(255,255,255,.08), transparent 60%),
+        radial-gradient(1000px 640px at 85% 55%, rgba(255,255,255,.06), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.72));
+      pointer-events:none;
+    }
+
+    /* Starfield layer */
+    #stars{
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.75) 50%, transparent 52%),
+        radial-gradient(1px 1px at 80% 30%, rgba(255,255,255,.55) 50%, transparent 52%),
+        radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,.60) 50%, transparent 52%),
+        radial-gradient(1px 1px at 65% 85%, rgba(255,255,255,.50) 50%, transparent 52%),
+        radial-gradient(1px 1px at 25% 55%, rgba(255,255,255,.40) 50%, transparent 52%),
+        radial-gradient(2px 2px at 55% 25%, rgba(130,220,255,.35) 50%, transparent 52%),
+        radial-gradient(2px 2px at 15% 80%, rgba(180,255,230,.25) 50%, transparent 52%);
+      opacity: .55;
+      animation: drift 26s ease-in-out infinite alternate;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(10px,-14px,0); }
     }
 
     header, main, footer{
@@ -54,12 +111,12 @@
 
     .title{ display:flex; flex-direction:column; gap: 6px; }
 
-    /* ✅ Cuter title font (no external download required) */
+    /* Cutier title + subtle star glow */
     h1{
       margin:0;
-      font-size: clamp(28px, 4vw, 44px);
+      font-size: clamp(30px, 4.4vw, 48px);
       letter-spacing: -0.02em;
-      font-weight: 900;
+      font-weight: 950;
       font-family:
         ui-rounded,
         "SF Pro Rounded",
@@ -68,13 +125,15 @@
         "Comic Sans MS",
         system-ui,
         sans-serif;
+      text-shadow: var(--glow-strong);
     }
 
     .subtitle{
-      color: var(--muted);
+      color: rgba(255,255,255,.82);
       font-size: 14px;
       line-height: 1.35;
-      max-width: 60ch;
+      max-width: 68ch;
+      text-shadow: var(--glow);
     }
 
     .controls{
@@ -89,15 +148,16 @@
       appearance:none;
       border: none;
       background: rgba(255,255,255,.10);
-      color: var(--text);
+      color: rgba(255,255,255,.92);
       padding: 10px 12px;
       border-radius: 999px;
       cursor:pointer;
       transition: transform .12s ease, background .2s ease;
       box-shadow: 0 10px 22px rgba(0,0,0,.22);
-      font-weight: 650;
+      font-weight: 700;
       font-size: 13px;
       white-space: nowrap;
+      text-shadow: var(--glow);
     }
     button:hover{ transform: translateY(-1px); background: rgba(255,255,255,.14); }
     button:active{ transform: translateY(0px) scale(.98); }
@@ -111,13 +171,14 @@
       border: none;
       background: rgba(255,255,255,.10);
       font-size: 13px;
-      color: rgba(255,255,255,.82);
+      color: rgba(255,255,255,.86);
       user-select:none;
       white-space: nowrap;
+      text-shadow: var(--glow);
     }
     .toggle input{
       width: 18px; height: 18px;
-      accent-color: #9fe3ff;
+      accent-color: #7de2ff;
       cursor:pointer;
     }
 
@@ -127,21 +188,14 @@
       padding-bottom: 18px;
     }
 
-    /* ✅ Darker, simpler “board” background (no busy grid) */
     .board{
       position: relative;
       width: 100%;
       min-height: 74vh;
       border-radius: 22px;
-
-      /* dark + slightly transparent feel */
-      background:
-        radial-gradient(900px 520px at 30% 20%, rgba(255,255,255,.05), transparent 60%),
-        radial-gradient(1000px 640px at 85% 55%, rgba(255,255,255,.035), transparent 60%),
-        rgba(0,0,0,.25);
-
+      background: rgba(0,0,0,.18);
       overflow: hidden;
-      padding: 10px;
+      padding: 12px;
       box-shadow: 0 18px 60px rgba(0,0,0,.45);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -156,14 +210,28 @@
       .board{ min-height: 76vh; }
     }
 
-    /* Polaroid */
+    /* Featured 2x2 grid (always visible) */
+    .featuredGrid{
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    @media (max-width: 520px){
+      .featuredGrid{
+        gap: 12px;
+        padding: 6px;
+      }
+    }
+
     .polaroid{
-      position: absolute;
-      width: var(--w);
-      height: var(--h);
-      left: var(--x);
-      top: var(--y);
-      transform: rotate(var(--r));
       border-radius: var(--radius);
       background: linear-gradient(180deg, var(--paper2), var(--paper));
       box-shadow: var(--shadow);
@@ -171,31 +239,23 @@
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
-      transition:
-        left .55s ease,
-        top .55s ease,
-        transform .55s ease,
-        opacity .25s ease;
-      opacity: 1;
+      transform: rotate(var(--r, 0deg));
+      transition: transform .18s ease;
     }
 
-    .polaroid::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius: var(--radius);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
-      pointer-events:none;
+    .polaroid:active{
+      transform: rotate(var(--r, 0deg)) scale(.99);
     }
 
     .mediaSlot{
       width: 100%;
-      height: calc(100% - 36px);
+      aspect-ratio: 4 / 3;
       border-radius: 12px;
       overflow: hidden;
-      background: #111;
+      background: #0b0b12;
       box-shadow: var(--shadow2);
     }
+
     .mediaSlot img,
     .mediaSlot video{
       width:100%;
@@ -213,7 +273,7 @@
       gap: 10px;
       font-size: 13px;
       color: var(--ink);
-      font-weight: 850;
+      font-weight: 900;
       letter-spacing: .01em;
       font-family: ui-rounded, "Segoe Print", "Bradley Hand", system-ui, sans-serif;
     }
@@ -231,37 +291,93 @@
       white-space: nowrap;
     }
 
-    .swapOut{ opacity: 0; }
+    /* Fullscreen viewer (click-to-enlarge) */
+    .viewer{
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+               max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .viewer.open{ display: flex; }
+
+    .viewerCard{
+      width: min(980px, 96vw);
+      height: min(86vh, 760px);
+      border-radius: 18px;
+      background: rgba(10,12,20,.55);
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .viewerMedia{
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      background: rgba(0,0,0,.35);
+    }
+
+    .viewerMedia img,
+    .viewerMedia video{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;  /* maximize viewing without cropping */
+      background: rgba(0,0,0,.25);
+    }
+
+    .viewerHint{
+      position:absolute;
+      top: 10px;
+      left: 10px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(255,255,255,.92);
+      background: rgba(0,0,0,.40);
+      border: 1px solid rgba(255,255,255,.12);
+      text-shadow: var(--glow);
+      user-select:none;
+    }
 
     footer{
       max-width: 1100px;
       margin: 10px auto 24px;
-      color: rgba(255,255,255,.55);
+      color: rgba(255,255,255,.60);
       font-size: 12px;
       display:flex;
       justify-content: space-between;
       gap: 14px;
       flex-wrap: wrap;
-    }
-
-    @media (prefers-reduced-motion: reduce){
-      .polaroid{ transition: none !important; }
+      text-shadow: var(--glow);
     }
   </style>
 </head>
 
 <body>
+  <div id="stars" aria-hidden="true"></div>
+
   <header>
     <div class="title">
-      <h1>Us 💙</h1>
+      <h1>Us 🩵</h1>
       <div class="subtitle">
-        Polaroid collage — all cards stay visible. Timeline advances oldest → newest, and at least one video shows in the mix.
+        Top row: 2 photos. Bottom row: 2 videos (playing). Oldest → newest timeline.
+        When Auto is OFF, tap a card to enlarge it.
       </div>
     </div>
 
     <div class="controls">
-      <button id="shuffleBtn">Shuffle now</button>
-      <button id="refreshBtn">New collage</button>
+      <button id="shuffleBtn">Advance</button>
+      <button id="refreshBtn">Restart</button>
       <label class="toggle" title="Auto advance every few seconds">
         <input id="autoToggle" type="checkbox" checked />
         Auto
@@ -270,118 +386,55 @@
   </header>
 
   <main>
-    <section class="board" id="board" aria-label="Polaroid collage"></section>
+    <section class="board" id="board">
+      <div class="featuredGrid" id="featured"></div>
+    </section>
   </main>
 
   <footer>
-    <div>Made with ❤️ — hosted on GitHub Pages.</div>
+    <div>Made with 🩵 — hosted on GitHub Pages.</div>
     <div id="status">Loading…</div>
   </footer>
+
+  <!-- Fullscreen viewer -->
+  <div class="viewer" id="viewer" aria-hidden="true">
+    <div class="viewerCard" id="viewerCard">
+      <div class="viewerHint">Tap again to close</div>
+      <div class="viewerMedia" id="viewerMedia"></div>
+    </div>
+  </div>
 
 <script>
   // =========================
   // YOUR MEDIA LIST
   // =========================
+  // Paste your current array here (photos + videos). Keep it exactly as-is.
   const mediaItems = [
-    // Photos
-    { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
-    { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
-    { kind: "image", src: "photos/03.jpg", date: "2025-9-2" },
-    { kind: "image", src: "photos/04.jpg", date: "2025-9-7" },
-    { kind: "image", src: "photos/05.jpg", date: "2025-9-7" },
-    { kind: "image", src: "photos/06.jpg", date: "2025-11-3" },
-    { kind: "image", src: "photos/06(2).jpg", date: "2025-11-3" },
-    { kind: "image", src: "photos/07.jpg", date: "2025-11-3" },
-    { kind: "image", src: "photos/08.jpg", date: "2025-11-3" },
-    { kind: "image", src: "photos/09.jpg", date: "2025-12-14" },
-    { kind: "image", src: "photos/10.jpg", date: "2025-12-14" },
-    { kind: "image", src: "photos/11.jpg", date: "2025-9-17" },
-    { kind: "image", src: "photos/12.jpg", date: "2024-12-1" },
-    { kind: "image", src: "photos/13.jpg", date: "2025-10-23" },
-    { kind: "image", src: "photos/14.jpg", date: "2025-1-5" },
-    { kind: "image", src: "photos/15.jpg", date: "2025-11-10" },
-    { kind: "image", src: "photos/16.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/17.jpg", date: "2025-9-22" },
-    { kind: "image", src: "photos/18.jpg", date: "2025-9-22" },
-    { kind: "image", src: "photos/19.jpg", date: "2025-9-23" },
-    { kind: "image", src: "photos/20.jpg", date: "2025-9-23" },
-    { kind: "image", src: "photos/21.jpg", date: "2025-10-12" },
-    { kind: "image", src: "photos/22.jpg", date: "2025-10-12" },
-    { kind: "image", src: "photos/23.jpg", date: "2025-10-12" },
-    { kind: "image", src: "photos/24.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/25.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/26.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/27.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/28.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/29.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/30.jpg", date: "2025-10-15" },
-    { kind: "image", src: "photos/31.jpg", date: "2025-10-16" },
-    { kind: "image", src: "photos/32.jpg", date: "2025-10-18" },
-    { kind: "image", src: "photos/33.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/34.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/35.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/36.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/37.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/38.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/39.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/40.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/41.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/42.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/43.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/44.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/45.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/46.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/47.jpg", date: "2025-10-31" },
-    { kind: "image", src: "photos/48.jpg", date: "2025-10-31" },
-    { kind: "image", src: "photos/49.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/50.jpg", date: "2025-11-17" },
-    { kind: "image", src: "photos/51.jpg", date: "2025-12-26" },
-    { kind: "image", src: "photos/53.jpg", date: "2025-10-30" },
-
-    // Videos
-    { kind: "video", src: "videos/01.MOV", poster: "photos/01.jpg", date: "2025-10-25" },
-    { kind: "video", src: "videos/21.MOV", poster: "photos/21.jpg", date: "2025-10-12" },
-    { kind: "video", src: "videos/22.MOV", poster: "photos/22.jpg", date: "2025-10-12" },
-    { kind: "video", src: "videos/25.MOV", poster: "photos/25.jpg", date: "2025-10-13" },
-    { kind: "video", src: "videos/26.MOV", poster: "photos/26.jpg", date: "2025-10-13" },
-    { kind: "video", src: "videos/27.MOV", poster: "photos/27.jpg", date: "2025-10-13" },
-    { kind: "video", src: "videos/29.MOV", poster: "photos/29.jpg", date: "2025-10-13" },
-    { kind: "video", src: "videos/40.MOV", poster: "photos/40.jpg", date: "2025-10-25" },
-    { kind: "video", src: "videos/09.MOV", poster: "photos/09.jpg", date: "2025-12-14" },
-    { kind: "video", src: "videos/10.MOV", poster: "photos/10.jpg", date: "2025-12-14" },
-    { kind: "video", src: "videos/42.MOV", poster: "photos/42.jpg", date: "2025-10-25" },
-    { kind: "video", src: "videos/44.MOV", poster: "photos/44.jpg", date: "2025-10-25" },
-    { kind: "video", src: "videos/02.MP4", poster: "photos/13.jpg", date: "2025-10-17" },
+    /* PASTE YOUR LIST HERE */
   ];
 
   // =========================
-  // BEHAVIOR SETTINGS
+  // SETTINGS
   // =========================
-  const TIMELINE_MODE = "asc";
-  const AUTO_MS = 11000;
-  const SWAP_FRACTION = 0.45;
-  let timelineIndex = 0;
+  const AUTO_MS = 11000;       // pace
+  const TIMELINE_MODE = "asc"; // oldest -> newest
+  let cursor = 0;
 
-  const board = document.getElementById("board");
+  const featured = document.getElementById("featured");
   const statusEl = document.getElementById("status");
   const shuffleBtn = document.getElementById("shuffleBtn");
   const refreshBtn = document.getElementById("refreshBtn");
   const autoToggle = document.getElementById("autoToggle");
+
+  const viewer = document.getElementById("viewer");
+  const viewerMedia = document.getElementById("viewerMedia");
+
   let autoTimer = null;
+  let viewerOpen = false;
 
-  function isPhone(){
-    return window.matchMedia("(max-width: 520px)").matches;
-  }
-
-  function getCardCount(){
-    return isPhone() ? 10 : 14;
-  }
-
-  function getMaxVideoCards(){
-    return isPhone() ? 2 : 3;
-  }
-
-  // Normalize dates like 2025-7-2 -> 2025-07-02
+  // =========================
+  // DATE NORMALIZATION + SORT
+  // =========================
   function normalizeDate(dateStr){
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
@@ -407,96 +460,106 @@
     return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
   }
 
-  function shuffleArray(arr){
-    for(let i = arr.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
+  // Sort once at load (strict oldest -> newest)
+  let sortedItems = [...mediaItems].sort((a,b) => dateKey(a.date) - dateKey(b.date));
+  if(TIMELINE_MODE === "desc") sortedItems.reverse();
+
+  const sortedPhotos = sortedItems.filter(x => x.kind === "image");
+  const sortedVideos = sortedItems.filter(x => x.kind === "video");
+
+  // =========================
+  // BACKGROUND PHOTO CYCLING (uses current featured items)
+  // =========================
+  function setBackgroundFromItem(item){
+    const src = (item.poster || item.src);
+    document.documentElement.style.setProperty("--bg-photo", `url("${src}")`);
   }
 
-  function getSortedItems(){
-    const sorted = [...mediaItems].sort((a,b) => dateKey(a.date) - dateKey(b.date));
-    return (TIMELINE_MODE === "desc") ? sorted.reverse() : sorted;
-  }
+  // =========================
+  // FEATURED SELECTION (Oldest -> Newest)
+  // Next 2 photos + next 2 videos as we move forward
+  // =========================
+  function getNextFeaturedSet(){
+    const len = sortedItems.length;
+    let idx = cursor;
+    let steps = 0;
 
-  function getNextTimelineChunk(n){
-    const sorted = getSortedItems();
-    const chunk = [];
-    for(let i = 0; i < n; i++){
-      chunk.push(sorted[(timelineIndex + i) % sorted.length]);
-    }
-    timelineIndex = (timelineIndex + n) % sorted.length;
-    return chunk;
-  }
+    const photos = [];
+    const videos = [];
 
-  // Ensure at least one video appears in the current set (if available)
-  function pickSetWithGuaranteedVideo(count){
-    const sorted = getSortedItems();
-    const videos = sorted.filter(x => x.kind === "video");
-    if(!videos.length) return getNextTimelineChunk(count);
-
-    let videoPick = getNextTimelineChunk(1).find(x => x.kind === "video");
-    if(!videoPick) videoPick = videos[0];
-
-    const rest = getNextTimelineChunk(count - 1).filter(x => x.src !== videoPick.src);
-    while(rest.length < count - 1){
-      const add = getNextTimelineChunk(1)[0];
-      if(add && add.src !== videoPick.src) rest.push(add);
-    }
-    return [videoPick, ...rest].slice(0, count);
-  }
-
-  // ✅ Bigger polaroids on iPhone (uses more board space)
-  function spreadLayout(count){
-    const rect = board.getBoundingClientRect();
-    const pad = isPhone() ? 10 : 18;
-
-    const cols = isPhone() ? 2 : (rect.width > 920 ? 4 : 3);
-    const rows = Math.ceil(count / cols);
-
-    const cellW = (rect.width - pad*2) / cols;
-    const cellH = (rect.height - pad*2) / rows;
-
-    // Increase phone size (was ~0.92); this uses more of each cell
-    const baseW = Math.min(isPhone() ? 250 : 245, cellW * (isPhone() ? 0.98 : 0.92));
-    const baseH = Math.round(baseW * 1.18);
-
-    const jitter = isPhone() ? 10 : 18;
-
-    const layouts = [];
-    for(let i=0;i<count;i++){
-      const c = i % cols;
-      const r = Math.floor(i / cols);
-
-      const cx = pad + c * cellW + cellW/2;
-      const cy = pad + r * cellH + cellH/2;
-
-      const x = cx - baseW/2 + (Math.random()*jitter - jitter/2);
-      const y = cy - baseH/2 + (Math.random()*jitter - jitter/2);
-
-      const rot = (Math.random() * 16 - 8); // slightly calmer tilt on phone
-
-      const clampedX = Math.max(pad, Math.min(x, rect.width - baseW - pad));
-      const clampedY = Math.max(pad, Math.min(y, rect.height - baseH - pad));
-
-      layouts.push({ x: clampedX, y: clampedY, r: rot, w: baseW, h: baseH, z: 10 + i });
+    while((photos.length < 2 || videos.length < 2) && steps < len * 2){
+      const item = sortedItems[idx % len];
+      if(item.kind === "image" && photos.length < 2) photos.push(item);
+      if(item.kind === "video" && videos.length < 2) videos.push(item);
+      idx++;
+      steps++;
     }
 
-    return shuffleArray(layouts);
+    while(photos.length < 2 && sortedPhotos.length) photos.push(sortedPhotos[photos.length % sortedPhotos.length]);
+    while(videos.length < 2 && sortedVideos.length) videos.push(sortedVideos[videos.length % sortedVideos.length]);
+
+    cursor = idx % len;
+    return { photos, videos };
   }
 
-  function bringToFront(card){
-    const cards = [...board.querySelectorAll(".polaroid")];
-    const topZ = Math.max(...cards.map(c => parseInt(c.style.zIndex || "10", 10)));
-    card.style.zIndex = topZ + 10;
+  // =========================
+  // VIEWER (tap to enlarge when Auto is OFF)
+  // =========================
+  function openViewer(item){
+    viewerMedia.innerHTML = "";
+
+    if(item.kind === "video"){
+      const v = document.createElement("video");
+      v.controls = true;
+      v.playsInline = true;
+      v.preload = "metadata";
+      if(item.poster) v.poster = item.poster;
+
+      const source = document.createElement("source");
+      source.src = item.src;
+      const ext = item.src.split(".").pop().toLowerCase();
+      source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
+      v.appendChild(source);
+
+      viewerMedia.appendChild(v);
+
+      // try to start (muted autoplay isn't necessary since user tapped)
+      v.play().catch(()=>{});
+    } else {
+      const img = document.createElement("img");
+      img.alt = "Photo";
+      img.src = item.src;
+      viewerMedia.appendChild(img);
+    }
+
+    viewer.classList.add("open");
+    viewer.setAttribute("aria-hidden", "false");
+    viewerOpen = true;
   }
 
-  function createPolaroid(item){
+  function closeViewer(){
+    viewer.classList.remove("open");
+    viewer.setAttribute("aria-hidden", "true");
+    viewerMedia.innerHTML = "";
+    viewerOpen = false;
+  }
+
+  // click outside card closes too
+  viewer.addEventListener("click", (e) => {
+    if(e.target === viewer) closeViewer();
+  });
+
+  // =========================
+  // RENDERING
+  // =========================
+  function clearFeatured(){
+    featured.innerHTML = "";
+  }
+
+  function createPolaroidCard(item, isVideo){
     const card = document.createElement("div");
     card.className = "polaroid";
-    card.dataset.kind = item.kind;
-    card.dataset.src  = item.src;
+    card.style.setProperty("--r", `${(Math.random()*8 - 4).toFixed(2)}deg`);
 
     const mediaSlot = document.createElement("div");
     mediaSlot.className = "mediaSlot";
@@ -509,7 +572,7 @@
 
     const pill = document.createElement("div");
     pill.className = "pill";
-    pill.textContent = item.kind === "video" ? "LIVE" : "";
+    pill.textContent = isVideo ? "LIVE" : "";
 
     caption.appendChild(dateEl);
     caption.appendChild(pill);
@@ -517,28 +580,7 @@
     card.appendChild(mediaSlot);
     card.appendChild(caption);
 
-    setMediaIntoCard(card, item);
-
-    card.addEventListener("click", () => {
-      bringToFront(card);
-      const v = card.querySelector("video");
-      if(v){
-        if(v.paused) v.play().catch(()=>{});
-        else v.pause();
-      }
-    });
-
-    return card;
-  }
-
-  function setMediaIntoCard(card, item){
-    const mediaSlot = card.querySelector(".mediaSlot");
-    mediaSlot.innerHTML = "";
-
-    card.querySelector(".caption > div:first-child").textContent = formatDateLabel(item.date);
-    card.querySelector(".pill").textContent = item.kind === "video" ? "LIVE" : "";
-
-    if(item.kind === "video"){
+    if(isVideo){
       const v = document.createElement("video");
       v.autoplay = true;
       v.loop = true;
@@ -554,8 +596,6 @@
       v.appendChild(source);
 
       mediaSlot.appendChild(v);
-
-      // best-effort autoplay kick
       setTimeout(() => v.play().catch(()=>{}), 80);
     } else {
       const img = document.createElement("img");
@@ -566,124 +606,72 @@
       mediaSlot.appendChild(img);
     }
 
-    card.dataset.kind = item.kind;
-    card.dataset.src  = item.src;
-  }
-
-  function applyLayout(card, layout){
-    card.style.setProperty("--x", `${layout.x}px`);
-    card.style.setProperty("--y", `${layout.y}px`);
-    card.style.setProperty("--r", `${layout.r}deg`);
-    card.style.setProperty("--w", `${layout.w}px`);
-    card.style.setProperty("--h", `${layout.h}px`);
-    card.style.zIndex = layout.z;
-  }
-
-  function buildBoard(){
-    board.innerHTML = "";
-    timelineIndex = 0;
-
-    const count = Math.min(getCardCount(), mediaItems.length);
-    const picked = pickSetWithGuaranteedVideo(count);
-    const layouts = spreadLayout(count);
-
-    picked.forEach((item, i) => {
-      const card = createPolaroid(item);
-      applyLayout(card, layouts[i]);
-      board.appendChild(card);
+    // ✅ Only allow enlarge when Auto is OFF
+    card.addEventListener("click", () => {
+      if(autoToggle.checked) return; // must be unchecked
+      if(viewerOpen) closeViewer();
+      else openViewer(item);
     });
 
-    statusEl.textContent = `Collage • oldest → newest • showing ${count}`;
+    return card;
   }
 
-  function advanceTimeline(){
-    const cards = [...board.querySelectorAll(".polaroid")];
-    if(!cards.length) return;
+  function renderFeatured(set){
+    clearFeatured();
 
-    const maxVideos = getMaxVideoCards();
-    const currentVideoCount = cards.filter(c => c.dataset.kind === "video").length;
-    const roomForVideos = Math.max(0, maxVideos - currentVideoCount);
+    // choose background from the newest card in the 4-pack (nice “progression” feel)
+    setBackgroundFromItem(set.videos[1] || set.photos[1] || set.photos[0] || set.videos[0]);
 
-    const swapCount = Math.max(2, Math.floor(cards.length * SWAP_FRACTION));
-    const indices = shuffleArray([...Array(cards.length).keys()]).slice(0, swapCount);
+    // Top row: 2 photos (fully visible)
+    featured.appendChild(createPolaroidCard(set.photos[0], false));
+    featured.appendChild(createPolaroidCard(set.photos[1], false));
 
-    let replacements = getNextTimelineChunk(swapCount);
+    // Bottom row: 2 videos (always visible + playing)
+    featured.appendChild(createPolaroidCard(set.videos[0], true));
+    featured.appendChild(createPolaroidCard(set.videos[1], true));
 
-    // ensure at least one incoming video when possible
-    const sorted = getSortedItems();
-    const videos = sorted.filter(x => x.kind === "video");
-    const images = sorted.filter(x => x.kind === "image");
+    statusEl.textContent = `Oldest → newest • 2 photos + 2 videos`;
+  }
 
-    if(videos.length && roomForVideos > 0){
-      const hasVideoIncoming = replacements.some(x => x.kind === "video");
-      if(!hasVideoIncoming){
-        replacements[0] = videos[timelineIndex % videos.length];
-      }
-    }
+  // =========================
+  // CONTROLS
+  // =========================
+  function build(){
+    cursor = 0; // restart timeline from oldest
+    closeViewer();
+    renderFeatured(getNextFeaturedSet());
+  }
 
-    // enforce max visible videos
-    if(roomForVideos <= 0){
-      let imgIdx = 0;
-      replacements = replacements.map(it => (it.kind === "video" && images.length)
-        ? images[(imgIdx++) % images.length]
-        : it
-      );
-    } else {
-      let usedVideos = 0;
-      let imgIdx = 0;
-      replacements = replacements.map(it => {
-        if(it.kind === "video"){
-          if(usedVideos >= roomForVideos && images.length){
-            return images[(imgIdx++) % images.length];
-          }
-          usedVideos++;
-        }
-        return it;
-      });
-    }
-
-    const layouts = spreadLayout(cards.length);
-
-    indices.forEach((idx, k) => {
-      const card = cards[idx];
-      card.classList.add("swapOut");
-
-      setTimeout(() => {
-        setMediaIntoCard(card, replacements[k]);
-        applyLayout(card, layouts[idx]);
-        bringToFront(card);
-        card.classList.remove("swapOut");
-      }, 220);
-    });
-
-    cards.forEach((card, i) => {
-      if(!indices.includes(i)){
-        applyLayout(card, layouts[i]);
-      }
-    });
-
-    statusEl.textContent = `Advancing timeline • swapped ${swapCount} cards`;
+  function advance(){
+    closeViewer();
+    renderFeatured(getNextFeaturedSet());
   }
 
   function startAuto(){
     stopAuto();
-    autoTimer = setInterval(advanceTimeline, AUTO_MS);
+    autoTimer = setInterval(advance, AUTO_MS);
   }
+
   function stopAuto(){
     if(autoTimer) clearInterval(autoTimer);
     autoTimer = null;
   }
 
-  shuffleBtn.addEventListener("click", advanceTimeline);
-  refreshBtn.addEventListener("click", buildBoard);
-  autoToggle.addEventListener("change", (e) => e.target.checked ? startAuto() : stopAuto());
+  shuffleBtn.addEventListener("click", advance);
+  refreshBtn.addEventListener("click", build);
 
-  window.addEventListener("resize", () => {
-    clearTimeout(window.__resizeTimer);
-    window.__resizeTimer = setTimeout(buildBoard, 180);
+  autoToggle.addEventListener("change", (e) => {
+    // If turning Auto ON, close viewer
+    if(e.target.checked){
+      closeViewer();
+      startAuto();
+    } else {
+      stopAuto();
+    }
   });
 
-  buildBoard();
+  // boot
+  build();
   startAuto();
 </script>
 </body>
