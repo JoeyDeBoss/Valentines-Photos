@@ -219,7 +219,7 @@
       border-radius: var(--radius);
       background: linear-gradient(180deg, var(--paper2), var(--paper));
       box-shadow: var(--shadow);
-      padding: 8px 8px 12px; /* a bit less frame = bigger media */
+      padding: 8px 8px 12px;
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
@@ -254,7 +254,7 @@
       overflow: hidden;
       background: #0b0b12;
       box-shadow: var(--shadow2);
-      position: relative; /* required for blur fill */
+      position: relative;
     }
 
     .mediaSlot img,
@@ -268,9 +268,7 @@
       z-index: 1;
     }
 
-    /* =========================
-       TOP PHOTOS: full image + NO black bars
-       ========================= */
+    /* Mobile top photos: full image + blurred fill */
     .fitPhoto .mediaSlot{
       background-image: var(--fitbg);
       background-size: cover;
@@ -292,6 +290,40 @@
       object-fit: contain;
       background: transparent;
       z-index: 1;
+    }
+
+    /* ✅ Desktop: show WHOLE photo in EVERY polaroid (no crop) with blur fill */
+    @media (min-width: 900px){
+      .featuredGrid{
+        height: min(78vh, 860px);
+        max-width: 1100px;
+        gap: 18px;
+        padding: 16px;
+      }
+
+      /* All image polaroids on desktop use the same blur-fill fit */
+      .isImage .mediaSlot{
+        background-image: var(--fitbg);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+      .isImage .mediaSlot::before{
+        content:"";
+        position:absolute;
+        inset:-18px;
+        background-image: var(--fitbg);
+        background-size: cover;
+        background-position: center;
+        filter: blur(22px) brightness(.82) saturate(1.15);
+        transform: scale(1.25);
+        z-index: 0;
+      }
+      .isImage .mediaSlot img{
+        object-fit: contain;
+        background: transparent;
+        z-index: 1;
+      }
     }
 
     .caption{
@@ -321,28 +353,6 @@
       white-space: nowrap;
     }
 
-    /* =========================
-       Desktop / PC Enhancements (does NOT affect iPhone)
-       ========================= */
-    @media (min-width: 900px){
-      .featuredGrid{
-        height: min(78vh, 860px);
-        max-width: 1100px;
-        gap: 18px;
-        padding: 16px;
-      }
-      .polaroid{
-        padding: 10px 10px 12px;
-      }
-
-      /* On desktop, fill top photos too (no bars), slight crop is okay */
-      .fitPhoto .mediaSlot img{
-        object-fit: cover;
-      }
-      /* blur fill still exists, but cover means no bars anyway */
-    }
-
-    /* Viewer */
     .viewer{
       position: fixed;
       inset: 0;
@@ -470,7 +480,7 @@
   <!-- Fullscreen viewer -->
   <div class="viewer" id="viewer" aria-hidden="true">
     <div class="viewerCard" id="viewerCard">
-      <div class="viewerHint">Swipe down to close</div>
+      <div class="viewerHint">Swipe down to close (or press Esc)</div>
       <div class="viewerClose" id="viewerClose">✕</div>
       <div class="viewerMedia" id="viewerMedia"></div>
     </div>
@@ -551,7 +561,6 @@
   ];
 
   const AUTO_MS = 11000;
-  const TIMELINE_MODE = "asc";
 
   const featuredEl = document.getElementById("featured");
   const extrasEl = document.getElementById("extras");
@@ -602,6 +611,7 @@
     document.documentElement.style.setProperty("--bg-photo", `url("${src}")`);
   }
 
+  // Sort by date
   let sortedItems = [...mediaItems].sort((a,b) => dateKey(a.date) - dateKey(b.date));
   const sortedPhotos = sortedItems.filter(x => x.kind === "image");
   const sortedVideos = sortedItems.filter(x => x.kind === "video");
@@ -623,7 +633,6 @@
     const start = (photoCursor + videoCursor) % sortedItems.length;
     let idx = start;
     let steps = 0;
-
     while(extras.length < count && steps < sortedItems.length * 2){
       const it = sortedItems[idx % sortedItems.length];
       if(it.kind === "image") extras.push(it);
@@ -631,13 +640,13 @@
     }
     idx = start; steps = 0;
     while(extras.length < count && steps < sortedItems.length * 2){
-      const it = sortedItems[idx % sortedItems.length];
-      extras.push(it);
+      extras.push(sortedItems[idx % sortedItems.length]);
       idx++; steps++;
     }
     return extras.slice(0, count);
   }
 
+  // Auto pause/resume around viewer
   function openViewer(item){
     if(autoToggle.checked && autoTimer){
       resumeAutoAfterClose = true;
@@ -647,6 +656,7 @@
     }
 
     viewerMedia.innerHTML = "";
+
     if(item.kind === "video"){
       const v = document.createElement("video");
       v.controls = true;
@@ -692,6 +702,52 @@
   viewerClose.addEventListener("click", closeViewer);
   viewer.addEventListener("click", (e) => { if(e.target === viewer) closeViewer(); });
 
+  // ✅ Desktop close with ESC
+  window.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && viewerOpen) closeViewer();
+  });
+
+  // ✅ Swipe-down to close (RESTORED)
+  let startY = null, startX = null, currentDy = 0, swiping = false;
+
+  viewer.addEventListener("touchstart", (e) => {
+    if(!viewerOpen) return;
+    const t = e.touches[0];
+    startY = t.clientY;
+    startX = t.clientX;
+    currentDy = 0;
+    swiping = true;
+  }, {passive:true});
+
+  viewer.addEventListener("touchmove", (e) => {
+    if(!swiping || startY === null) return;
+    e.preventDefault(); // important for iOS
+    const t = e.touches[0];
+    const dy = t.clientY - startY;
+    const dx = t.clientX - startX;
+
+    if(Math.abs(dy) > Math.abs(dx)){
+      currentDy = Math.max(0, dy);
+      viewerCard.style.setProperty("--vy", `${currentDy}px`);
+      viewerCard.style.setProperty("--vo", `${Math.max(0.25, 1 - currentDy/300)}`);
+    }
+  }, {passive:false});
+
+  viewer.addEventListener("touchend", () => {
+    if(!swiping) return;
+    swiping = false;
+
+    if(currentDy > 120){
+      closeViewer();
+    } else {
+      viewerCard.style.setProperty("--vy", "0px");
+      viewerCard.style.setProperty("--vo", "1");
+    }
+    startY = null;
+    startX = null;
+    currentDy = 0;
+  });
+
   function createMediaNode(item, isVideo){
     const mediaSlot = document.createElement("div");
     mediaSlot.className = "mediaSlot";
@@ -720,6 +776,9 @@
       img.alt = "Photo";
       img.src = item.src;
       mediaSlot.appendChild(img);
+
+      // Set background for blur-fill (desktop uses isImage class too)
+      mediaSlot.style.setProperty("--fitbg", `url("${item.src}")`);
     }
 
     return mediaSlot;
@@ -729,7 +788,7 @@
     const { extra=false, fitPhoto=false } = options;
 
     const card = document.createElement("div");
-    card.className = "polaroid" + (extra ? " extra" : "") + (fitPhoto ? " fitPhoto" : "");
+    card.className = "polaroid" + (extra ? " extra" : "") + (fitPhoto ? " fitPhoto" : "") + (!isVideo ? " isImage" : "");
     card.style.setProperty("--r", `${(Math.random()*10 - 5).toFixed(2)}deg`);
 
     const caption = document.createElement("div");
@@ -747,11 +806,10 @@
 
     const mediaNode = createMediaNode(item, isVideo);
 
-    /* ✅ IMPORTANT: set blurred-fill background directly on the mediaSlot for fitPhoto */
+    // Make sure top photos have blur fill available
     if(fitPhoto && item.kind === "image"){
-      mediaNode.style.setProperty("--fitbg", `url("${item.src}")`);
-      // Also set on card for inheritance (extra safety)
       card.style.setProperty("--fitbg", `url("${item.src}")`);
+      mediaNode.style.setProperty("--fitbg", `url("${item.src}")`);
     }
 
     card.appendChild(mediaNode);
@@ -788,8 +846,11 @@
 
     setBackgroundFromItem(featured.videos[1] || featured.photos[1] || featured.photos[0] || featured.videos[0]);
 
+    // Top photos (mobile: contain + blur fill)
     featuredEl.appendChild(createPolaroid(featured.photos[0], false, { fitPhoto:true }));
     featuredEl.appendChild(createPolaroid(featured.photos[1], false, { fitPhoto:true }));
+
+    // Bottom videos
     featuredEl.appendChild(createPolaroid(featured.videos[0], true));
     featuredEl.appendChild(createPolaroid(featured.videos[1], true));
 
