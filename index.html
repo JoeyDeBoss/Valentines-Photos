@@ -192,7 +192,7 @@
       pointer-events: auto;
     }
 
-    /* MOBILE default: 2x2 featured */
+    /* Mobile default: 2x2 featured */
     .featuredGrid{
       position: relative;
       z-index: 10;
@@ -479,7 +479,6 @@
       <div class="subtitle">Happy Valentine's Day Princess. - Something to open when you need to smile.</div>
     </div>
 
-    <!-- Button order: Restart, Advance, Auto -->
     <div class="controls">
       <button id="refreshBtn">Restart</button>
       <button id="shuffleBtn">Advance</button>
@@ -502,7 +501,6 @@
     <div id="status">Loading…</div>
   </footer>
 
-  <!-- Fullscreen viewer -->
   <div class="viewer" id="viewer" aria-hidden="true">
     <div class="viewerCard" id="viewerCard">
       <div class="viewerHint">Swipe down to close (or press Esc)</div>
@@ -598,9 +596,12 @@
   const viewerMedia = document.getElementById("viewerMedia");
   const viewerClose = document.getElementById("viewerClose");
 
-  let autoTimer = null;
+  let autoTimer = null; // timeout handle
   let viewerOpen = false;
   let resumeAutoAfterClose = false;
+
+  // Guards for no-flash preloading
+  let advancing = false;
 
   // Cursors
   let photoCursor = 0;
@@ -648,6 +649,64 @@
   function focusedPhotoCount(){ return isDesktop() ? 4 : 2; }
   function focusedVideoCount(){ return isDesktop() ? 4 : 2; }
   function extrasCount(){ return isDesktop() ? 0 : 6; }
+
+  // ---------- NO-FLASH PRELOAD HELPERS ----------
+  const preloadCache = new Set();
+
+  function preloadImage(src){
+    if(!src || preloadCache.has(src)) return Promise.resolve(false);
+    preloadCache.add(src);
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.decoding = "async";
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = src;
+    });
+  }
+
+  function preloadSetAsync(featuredPeek, extrasPeek){
+    const tasks = [];
+
+    // preload photos being shown
+    (featuredPeek.photos || []).forEach(p => tasks.push(preloadImage(p.src)));
+
+    // preload video posters
+    (featuredPeek.videos || []).forEach(v => {
+      if(v.poster) tasks.push(preloadImage(v.poster));
+    });
+
+    // preload extras (mostly images)
+    (extrasPeek || []).forEach(x => {
+      if(x.kind === "image") tasks.push(preloadImage(x.src));
+      if(x.kind === "video" && x.poster) tasks.push(preloadImage(x.poster));
+    });
+
+    return Promise.all(tasks);
+  }
+
+  // Peek featured WITHOUT consuming timeline
+  function peekFeaturedSet(){
+    const pCount = focusedPhotoCount();
+    const vCount = focusedVideoCount();
+
+    const photos = [];
+    const videos = [];
+
+    for(let i=0;i<pCount;i++){
+      photos.push(sortedPhotos[(photoCursor + i) % sortedPhotos.length]);
+    }
+    for(let i=0;i<vCount;i++){
+      videos.push(sortedVideos[(videoCursor + i) % sortedVideos.length]);
+    }
+    return { photos, videos };
+  }
+
+  // Extras do not consume timeline; safe to compute for preload
+  function peekExtrasSet(){
+    return getExtrasSet(extrasCount());
+  }
+  // --------------------------------------------
 
   function getNextFeaturedSet(){
     const pCount = focusedPhotoCount();
@@ -699,6 +758,7 @@
     }
 
     viewerMedia.innerHTML = "";
+
     if(item.kind === "video"){
       const v = document.createElement("video");
       v.controls = true;
@@ -811,7 +871,7 @@
       setTimeout(() => v.play().catch(()=>{}), 80);
     } else {
       const img = document.createElement("img");
-      img.loading = "lazy";
+      img.loading = "eager";         // featured/extras already preloaded, so eager is fine
       img.decoding = "async";
       img.alt = "Photo";
 
@@ -880,32 +940,6 @@
     ];
   }
 
-  // Option 2: Warm-cache preloader
-  const preloadCache = new Set();
-  function preloadImage(src){
-    if(!src || preloadCache.has(src)) return;
-    preloadCache.add(src);
-    const img = new Image();
-    img.decoding = "async";
-    img.loading = "eager";
-    img.src = src;
-  }
-  async function preloadBatch(list, delayMs=35){
-    for(const src of list){
-      preloadImage(src);
-      await new Promise(r => setTimeout(r, delayMs));
-    }
-  }
-  function startPreloadingImages(){
-    const photoSrcs = (sortedPhotos || []).map(p => p.src);
-    const posterSrcs = (sortedVideos || []).map(v => v.poster).filter(Boolean);
-    const all = Array.from(new Set([...photoSrcs, ...posterSrcs]));
-    const run = () => preloadBatch(all, 35);
-    if("requestIdleCallback" in window) requestIdleCallback(run, { timeout: 2000 });
-    else setTimeout(run, 600);
-  }
-  window.addEventListener("load", startPreloadingImages);
-
   function renderAll(){
     featuredEl.innerHTML = "";
     extrasEl.innerHTML = "";
@@ -940,36 +974,54 @@
     statusEl.textContent = `Focused: ${focusedPhotoCount()} photos + ${focusedVideoCount()} videos • ${isDesktop() ? "PC mode" : "Mobile mode"}`;
   }
 
-  function restart(){
+  async function restart(){
     photoCursor = 0;
     videoCursor = 0;
     closeViewer();
+
+    // no-flash preload for the initial set
+    const featuredPeek = peekFeaturedSet();
+    const extrasPeek = peekExtrasSet();
+    await preloadSetAsync(featuredPeek, extrasPeek);
+
     renderAll();
   }
 
-  function advance(){
+  async function advance(){
+    if(advancing) return;
+    advancing = true;
+
     closeViewer();
+
+    // Peek next set (no cursor change)
+    const featuredPeek = peekFeaturedSet();
+    const extrasPeek = peekExtrasSet();
+
+    // Preload the exact next set (no flash)
+    await preloadSetAsync(featuredPeek, extrasPeek);
+
+    // Now render, consuming timeline
     renderAll();
 
-    // tiny lookahead for smoother focused swaps
-    for(let i=0;i<8 && sortedPhotos.length;i++){
-      const idx = (photoCursor + i) % sortedPhotos.length;
-      preloadImage(sortedPhotos[idx].src);
-    }
+    advancing = false;
   }
 
   function startAuto(){
     stopAuto();
-    autoTimer = setInterval(advance, AUTO_MS);
+    const tick = async () => {
+      await advance();
+      autoTimer = setTimeout(tick, AUTO_MS);
+    };
+    autoTimer = setTimeout(tick, AUTO_MS);
   }
 
   function stopAuto(){
-    if(autoTimer) clearInterval(autoTimer);
+    if(autoTimer) clearTimeout(autoTimer);
     autoTimer = null;
   }
 
-  shuffleBtn.addEventListener("click", advance);
-  refreshBtn.addEventListener("click", restart);
+  shuffleBtn.addEventListener("click", () => { advance(); });
+  refreshBtn.addEventListener("click", () => { restart(); });
 
   autoToggle.addEventListener("change", (e) => {
     if(e.target.checked) startAuto();
@@ -1077,8 +1129,11 @@
   initStars();
   drawStars();
 
-  restart();
-  if(autoToggle.checked) startAuto();
+  // Initial render with no-flash preload
+  (async () => {
+    await restart();
+    if(autoToggle.checked) startAuto();
+  })();
 
   window.addEventListener("resize", () => {
     resizeStars();
