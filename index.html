@@ -19,11 +19,9 @@
       --shadow: 0 16px 45px rgba(0,0,0,.46);
       --shadow2: 0 10px 26px rgba(0,0,0,.30);
 
-      /* dynamic background image */
       --bg-photo: none;
       --bg-photo-opacity: .14;
 
-      /* glow */
       --glow: 0 0 18px rgba(125, 225, 255, .22);
       --glow-strong: 0 0 26px rgba(125, 225, 255, .38);
     }
@@ -45,7 +43,6 @@
       isolation: isolate;
     }
 
-    /* Photo background */
     body::before{
       content:"";
       position: fixed;
@@ -61,7 +58,6 @@
       pointer-events:none;
     }
 
-    /* Dark overlay */
     body::after{
       content:"";
       position: fixed;
@@ -74,7 +70,6 @@
       pointer-events:none;
     }
 
-    /* Star canvas */
     #starCanvas{
       position: fixed;
       inset: 0;
@@ -87,7 +82,6 @@
       padding-right: max(16px, env(safe-area-inset-right));
     }
 
-    /* Header: controls top-right */
     header{
       max-width: 1100px;
       margin: 18px auto 10px;
@@ -191,32 +185,40 @@
       -webkit-backdrop-filter: blur(10px);
     }
 
-    /* 6 “extra” polaroids around the edges */
     .extrasLayer{
       position:absolute;
       inset: 0;
-      z-index: 6; /* under featured, above board */
-      pointer-events: auto; /* allow click-to-view when Auto is OFF */
+      z-index: 6;
+      pointer-events: auto;
     }
 
-    /* Featured grid is always fully visible and above extras */
+    /* ✅ Featured grid has a fixed height so cards don't "stretch" weirdly */
     .featuredGrid{
       position: relative;
       z-index: 10;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
       gap: 14px;
       width: 100%;
       max-width: 980px;
       margin: 0 auto;
       padding: 10px;
+
+      /* key: stable height prevents bottom caption stretch */
+      height: min(66vh, 660px);
     }
 
     @media (max-width: 520px){
       .board{ min-height: 76vh; }
-      .featuredGrid{ gap: 12px; padding: 6px; }
+      .featuredGrid{
+        gap: 12px;
+        padding: 6px;
+        height: min(68vh, 640px);
+      }
     }
 
+    /* ✅ Polaroid uses flex so caption doesn’t stretch */
     .polaroid{
       border-radius: var(--radius);
       background: linear-gradient(180deg, var(--paper2), var(--paper));
@@ -228,9 +230,13 @@
       transform: rotate(var(--r, 0deg));
       transition: transform .18s ease, opacity .25s ease;
       opacity: 1;
+
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
     }
 
-    /* smaller extras */
     .polaroid.extra{
       position:absolute;
       width: var(--w);
@@ -240,12 +246,15 @@
       z-index: var(--z);
       padding: 9px 9px 12px;
       opacity: .92;
+      height: auto; /* extras size by content */
     }
     .polaroid.extra:hover{ opacity: 1; }
 
+    /* mediaSlot grows; caption stays natural */
     .mediaSlot{
       width: 100%;
-      aspect-ratio: 4 / 3;
+      flex: 1;
+      min-height: 0;
       border-radius: 12px;
       overflow: hidden;
       background: #0b0b12;
@@ -256,9 +265,15 @@
     .mediaSlot video{
       width:100%;
       height:100%;
-      object-fit: cover;
-      object-position: center;
       display:block;
+      object-position: center;
+      object-fit: cover;
+    }
+
+    /* ✅ TOP PHOTOS: show entire image (no crop) */
+    .fitPhoto .mediaSlot img{
+      object-fit: contain;
+      background: #0b0b12;
     }
 
     .caption{
@@ -272,6 +287,7 @@
       font-weight: 900;
       letter-spacing: .01em;
       font-family: ui-rounded, "Segoe Print", "Bradley Hand", system-ui, sans-serif;
+      flex: 0 0 auto;
     }
 
     .pill{
@@ -300,6 +316,7 @@
       background: rgba(0,0,0,.72);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      touch-action: none;
     }
     .viewer.open{ display: flex; }
 
@@ -312,6 +329,9 @@
       border: 1px solid rgba(255,255,255,.10);
       overflow: hidden;
       position: relative;
+      transform: translateY(var(--vy, 0px));
+      opacity: var(--vo, 1);
+      transition: transform .2s ease, opacity .2s ease;
     }
 
     .viewerMedia{
@@ -345,6 +365,24 @@
       user-select:none;
     }
 
+    .viewerClose{
+      position:absolute;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.35);
+      color: rgba(255,255,255,.92);
+      font-size: 18px;
+      font-weight: 900;
+      display:grid;
+      place-items:center;
+      cursor: pointer;
+      text-shadow: var(--glow);
+    }
+
     footer{
       max-width: 1100px;
       margin: 10px auto 24px;
@@ -366,8 +404,8 @@
     <div class="title">
       <h1>Us 🩵</h1>
       <div class="subtitle">
-        10 polaroids total: 4 featured (2 photos top, 2 videos bottom) always fully visible + 6 extras around the edges.
-        Timeline advances oldest → newest. Auto OFF lets you tap to enlarge.
+        10 polaroids total: 4 featured (2 photos top, 2 videos bottom) always fully visible + 6 extras.
+        Top photos now show the full image. Auto OFF lets you tap to enlarge (swipe down to close).
       </div>
     </div>
 
@@ -395,15 +433,16 @@
 
   <!-- Fullscreen viewer -->
   <div class="viewer" id="viewer" aria-hidden="true">
-    <div class="viewerCard">
-      <div class="viewerHint">Tap again to close</div>
+    <div class="viewerCard" id="viewerCard">
+      <div class="viewerHint">Swipe down or tap ✕ to close</div>
+      <div class="viewerClose" id="viewerClose">✕</div>
       <div class="viewerMedia" id="viewerMedia"></div>
     </div>
   </div>
 
 <script>
   // =========================
-  // MEDIA LIST (your current list)
+  // MEDIA LIST
   // =========================
   const mediaItems = [
     { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
@@ -475,9 +514,6 @@
     { kind: "video", src: "videos/02.MP4", poster: "photos/13.jpg", date: "2025-10-17" },
   ];
 
-  // =========================
-  // SETTINGS
-  // =========================
   const AUTO_MS = 11000;
   const TIMELINE_MODE = "asc";
   let cursor = 0;
@@ -490,14 +526,14 @@
   const autoToggle = document.getElementById("autoToggle");
 
   const viewer = document.getElementById("viewer");
+  const viewerCard = document.getElementById("viewerCard");
   const viewerMedia = document.getElementById("viewerMedia");
+  const viewerClose = document.getElementById("viewerClose");
 
   let autoTimer = null;
   let viewerOpen = false;
 
-  // =========================
-  // DATE + SORT (strict oldest->newest)
-  // =========================
+  // DATE normalize/sort
   function normalizeDate(dateStr){
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
@@ -534,9 +570,7 @@
   const sortedPhotos = sortedItems.filter(x => x.kind === "image");
   const sortedVideos = sortedItems.filter(x => x.kind === "video");
 
-  // =========================
-  // Cursor-based selection (keeps strict forward progression)
-  // =========================
+  // strict forward selection: 2 photos + 2 videos + 6 extras
   function getNextFeaturedAndExtras(){
     const len = sortedItems.length;
     let idx = cursor;
@@ -546,79 +580,50 @@
     const videos = [];
     const used = new Set();
 
-    // collect 2 photos + 2 videos from the timeline (in order)
     while((photos.length < 2 || videos.length < 2) && steps < len * 2){
       const item = sortedItems[idx % len];
       const key = item.kind + "|" + item.src;
-
       if(!used.has(key)){
-        if(item.kind === "image" && photos.length < 2){
-          photos.push(item);
-          used.add(key);
-        } else if(item.kind === "video" && videos.length < 2){
-          videos.push(item);
-          used.add(key);
-        }
+        if(item.kind === "image" && photos.length < 2){ photos.push(item); used.add(key); }
+        else if(item.kind === "video" && videos.length < 2){ videos.push(item); used.add(key); }
       }
-      idx++;
-      steps++;
+      idx++; steps++;
     }
 
-    // fallback padding if needed
     while(photos.length < 2 && sortedPhotos.length){
       const it = sortedPhotos[photos.length % sortedPhotos.length];
-      const key = it.kind + "|" + it.src;
-      if(!used.has(key)){ photos.push(it); used.add(key); }
-      else photos.push(it);
+      photos.push(it);
     }
     while(videos.length < 2 && sortedVideos.length){
       const it = sortedVideos[videos.length % sortedVideos.length];
-      const key = it.kind + "|" + it.src;
-      if(!used.has(key)){ videos.push(it); used.add(key); }
-      else videos.push(it);
+      videos.push(it);
     }
 
-    // Now collect 6 extras continuing forward from where we left off (still in order)
     const extras = [];
     let extraSteps = 0;
-    while(extras.length < 6 && extraSteps < len * 2){
+    while(extras.length < 6 && extraSteps < len * 3){
       const item = sortedItems[idx % len];
       const key = item.kind + "|" + item.src;
-
-      // Prefer images for extras (so the bottom 2 videos remain the focus),
-      // but if we run out, allow videos too.
-      if(!used.has(key)){
-        if(item.kind === "image"){
-          extras.push(item);
-          used.add(key);
-        }
+      if(!used.has(key) && item.kind === "image"){
+        extras.push(item); used.add(key);
       }
-      idx++;
-      extraSteps++;
+      idx++; extraSteps++;
     }
-
-    // If not enough image extras, fill remaining with whatever we can (still in order)
     extraSteps = 0;
-    while(extras.length < 6 && extraSteps < len * 2){
+    while(extras.length < 6 && extraSteps < len * 3){
       const item = sortedItems[idx % len];
       const key = item.kind + "|" + item.src;
       if(!used.has(key)){
-        extras.push(item);
-        used.add(key);
+        extras.push(item); used.add(key);
       }
-      idx++;
-      extraSteps++;
+      idx++; extraSteps++;
     }
 
-    // Update global cursor forward (oldest -> newest progression)
     cursor = idx % len;
-
     return { photos, videos, extras };
   }
 
-  // =========================
-  // Viewer (Auto must be OFF)
-  // =========================
+  // Viewer open/close (with swipe down)
   function openViewer(item){
     viewerMedia.innerHTML = "";
 
@@ -647,6 +652,10 @@
     viewer.classList.add("open");
     viewer.setAttribute("aria-hidden", "false");
     viewerOpen = true;
+
+    // reset swipe vars
+    viewerCard.style.setProperty("--vy", "0px");
+    viewerCard.style.setProperty("--vo", "1");
   }
 
   function closeViewer(){
@@ -656,13 +665,64 @@
     viewerOpen = false;
   }
 
+  // close controls
+  viewerClose.addEventListener("click", closeViewer);
   viewer.addEventListener("click", (e) => {
     if(e.target === viewer) closeViewer();
   });
+  // tap media again closes
+  viewerCard.addEventListener("click", (e) => {
+    // avoid closing when pressing controls on video
+    if(e.target && e.target.tagName && (e.target.tagName.toLowerCase() === "video")) return;
+    // if click is not on the close button area, allow close by tap
+    if(e.target !== viewerClose) closeViewer();
+  });
 
-  // =========================
-  // Rendering helpers
-  // =========================
+  // swipe down to close
+  let startY = null;
+  let startX = null;
+  let swiping = false;
+
+  viewer.addEventListener("touchstart", (e) => {
+    if(!viewerOpen) return;
+    const t = e.touches[0];
+    startY = t.clientY;
+    startX = t.clientX;
+    swiping = true;
+  }, {passive:true});
+
+  viewer.addEventListener("touchmove", (e) => {
+    if(!swiping || startY === null) return;
+    const t = e.touches[0];
+    const dy = t.clientY - startY;
+    const dx = t.clientX - startX;
+
+    // only consider mostly-vertical swipes
+    if(Math.abs(dy) > Math.abs(dx)){
+      const clamped = Math.max(0, dy);
+      viewerCard.style.setProperty("--vy", `${clamped}px`);
+      const opacity = Math.max(0.25, 1 - clamped / 300);
+      viewerCard.style.setProperty("--vo", `${opacity}`);
+    }
+  }, {passive:true});
+
+  viewer.addEventListener("touchend", () => {
+    if(!swiping) return;
+    swiping = false;
+
+    const vy = parseFloat(getComputedStyle(viewerCard).transform.split(",")[5]) || 0;
+    // If dragged down enough, close
+    if(vy > 120){
+      closeViewer();
+    } else {
+      // snap back
+      viewerCard.style.setProperty("--vy", "0px");
+      viewerCard.style.setProperty("--vo", "1");
+    }
+    startY = null;
+    startX = null;
+  });
+
   function createMediaNode(item, isVideo){
     const mediaSlot = document.createElement("div");
     mediaSlot.className = "mediaSlot";
@@ -695,9 +755,11 @@
     return mediaSlot;
   }
 
-  function createPolaroid(item, isVideo, extra=false){
+  function createPolaroid(item, isVideo, options={}){
+    const { extra=false, fitPhoto=false } = options;
+
     const card = document.createElement("div");
-    card.className = "polaroid" + (extra ? " extra" : "");
+    card.className = "polaroid" + (extra ? " extra" : "") + (fitPhoto ? " fitPhoto" : "");
     card.style.setProperty("--r", `${(Math.random()*10 - 5).toFixed(2)}deg`);
 
     const caption = document.createElement("div");
@@ -716,7 +778,6 @@
     card.appendChild(createMediaNode(item, isVideo));
     card.appendChild(caption);
 
-    // Click-to-enlarge only when Auto OFF
     card.addEventListener("click", () => {
       if(autoToggle.checked) return;
       if(viewerOpen) closeViewer();
@@ -726,27 +787,38 @@
     return card;
   }
 
+  function getExtraSlots(){
+    const phone = window.matchMedia("(max-width: 520px)").matches;
+    const w = phone ? "36vw" : "230px";
+    const h = phone ? "22vh" : "200px";
+    return [
+      { x:"6%",  y:"6%",   w, h },
+      { x:"58%", y:"6%",   w, h },
+      { x:"2%",  y:"42%",  w, h },
+      { x:"64%", y:"42%",  w, h },
+      { x:"8%",  y:"76%",  w, h },
+      { x:"56%", y:"76%",  w, h },
+    ];
+  }
+
   function renderAll(set){
     featuredEl.innerHTML = "";
     extrasEl.innerHTML = "";
 
-    // Background uses newest of the four featured (keeps “moving” vibe)
     setBackgroundFromItem(set.videos[1] || set.photos[1] || set.photos[0] || set.videos[0]);
 
-    // Featured: top 2 photos
-    featuredEl.appendChild(createPolaroid(set.photos[0], false, false));
-    featuredEl.appendChild(createPolaroid(set.photos[1], false, false));
+    // Top row photos: full image visible (contain)
+    featuredEl.appendChild(createPolaroid(set.photos[0], false, { fitPhoto:true }));
+    featuredEl.appendChild(createPolaroid(set.photos[1], false, { fitPhoto:true }));
 
-    // Featured: bottom 2 videos
-    featuredEl.appendChild(createPolaroid(set.videos[0], true, false));
-    featuredEl.appendChild(createPolaroid(set.videos[1], true, false));
+    // Bottom row videos: cover, play
+    featuredEl.appendChild(createPolaroid(set.videos[0], true));
+    featuredEl.appendChild(createPolaroid(set.videos[1], true));
 
-    // Extras positions around the edges (guaranteed visible)
-    // These use fixed “slots” so they don’t pile on top of the featured grid.
     const slots = getExtraSlots();
     set.extras.forEach((item, i) => {
       const s = slots[i % slots.length];
-      const card = createPolaroid(item, item.kind === "video", true);
+      const card = createPolaroid(item, item.kind === "video", { extra:true });
 
       card.style.setProperty("--x", s.x);
       card.style.setProperty("--y", s.y);
@@ -760,27 +832,6 @@
     statusEl.textContent = `Oldest → newest • 10 polaroids (4 featured + 6 extras)`;
   }
 
-  function getExtraSlots(){
-    // positions (percent-based) so it works across phone sizes
-    // extras are smaller so featured stays dominant
-    const phone = window.matchMedia("(max-width: 520px)").matches;
-
-    const w = phone ? "38vw" : "240px";
-    const h = phone ? "28vh" : "220px";
-
-    return [
-      { x:"6%",  y:"8%",   w, h },
-      { x:"56%", y:"6%",   w, h },
-      { x:"4%",  y:"40%",  w, h },
-      { x:"60%", y:"42%",  w, h },
-      { x:"8%",  y:"72%",  w, h },
-      { x:"58%", y:"74%",  w, h },
-    ];
-  }
-
-  // =========================
-  // Controls
-  // =========================
   function build(){
     cursor = 0;
     closeViewer();
@@ -814,19 +865,9 @@
     }
   });
 
-  // Re-layout extras on rotate/resize
-  window.addEventListener("resize", () => {
-    clearTimeout(window.__resizeTimer);
-    window.__resizeTimer = setTimeout(() => {
-      // just re-render current state by stepping back 0 (quick hack: rebuild from current cursor minus 0 not easy)
-      // safest: restart timeline view layout (keeps order)
-      build();
-    }, 220);
-  });
-
-  // =========================
-  // Starfield (twinkle + drift + occasional streak)
-  // =========================
+  // -------------------------
+  // STARFIELD (same as before)
+  // -------------------------
   const canvas = document.getElementById("starCanvas");
   const ctx = canvas.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -914,6 +955,8 @@
   window.addEventListener("resize", () => {
     resizeCanvas();
     initStars();
+    // keep order, but re-render layout
+    build();
   });
 
   // BOOT
