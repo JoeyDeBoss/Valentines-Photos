@@ -290,14 +290,14 @@
       opacity: 1;
     }
 
-    /* Mobile top photos: full image + blur fill */
-    .fitPhoto .mediaSlot{
+    /* ✅ ALL image polaroids get blur background fallback (mobile + desktop) */
+    .isImage .mediaSlot{
       background-image: var(--fitbg);
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
     }
-    .fitPhoto .mediaSlot::before{
+    .isImage .mediaSlot::before{
       content:"";
       position:absolute;
       inset:-18px;
@@ -308,31 +308,16 @@
       transform: scale(1.25);
       z-index: 0;
     }
+
+    /* Mobile top focused photos show full image (contain) */
     .fitPhoto .mediaSlot img{
       object-fit: contain;
       background: transparent;
       z-index: 1;
     }
 
-    /* Desktop: show whole image for ALL images (contain + blur fill) */
+    /* Desktop: show whole image for ALL images */
     @media (min-width: 900px){
-      .isImage .mediaSlot{
-        background-image: var(--fitbg);
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-      }
-      .isImage .mediaSlot::before{
-        content:"";
-        position:absolute;
-        inset:-18px;
-        background-image: var(--fitbg);
-        background-size: cover;
-        background-position: center;
-        filter: blur(22px) brightness(.82) saturate(1.15);
-        transform: scale(1.25);
-        z-index: 0;
-      }
       .isImage .mediaSlot img{
         object-fit: contain;
         background: transparent;
@@ -596,7 +581,7 @@
   const viewerMedia = document.getElementById("viewerMedia");
   const viewerClose = document.getElementById("viewerClose");
 
-  let autoTimer = null; // timeout handle
+  let autoTimer = null;
   let viewerOpen = false;
   let resumeAutoAfterClose = false;
 
@@ -654,12 +639,19 @@
   const preloadCache = new Set();
 
   function preloadImage(src){
-    if(!src || preloadCache.has(src)) return Promise.resolve(false);
+    if(!src) return Promise.resolve(false);
+    if(preloadCache.has(src)) return Promise.resolve(true);
     preloadCache.add(src);
+
     return new Promise((resolve) => {
       const img = new Image();
       img.decoding = "async";
-      img.onload = () => resolve(true);
+      img.onload = async () => {
+        if(img.decode){
+          try { await img.decode(); } catch(e) {}
+        }
+        resolve(true);
+      };
       img.onerror = () => resolve(false);
       img.src = src;
     });
@@ -668,15 +660,12 @@
   function preloadSetAsync(featuredPeek, extrasPeek){
     const tasks = [];
 
-    // preload photos being shown
     (featuredPeek.photos || []).forEach(p => tasks.push(preloadImage(p.src)));
 
-    // preload video posters
     (featuredPeek.videos || []).forEach(v => {
       if(v.poster) tasks.push(preloadImage(v.poster));
     });
 
-    // preload extras (mostly images)
     (extrasPeek || []).forEach(x => {
       if(x.kind === "image") tasks.push(preloadImage(x.src));
       if(x.kind === "video" && x.poster) tasks.push(preloadImage(x.poster));
@@ -685,7 +674,6 @@
     return Promise.all(tasks);
   }
 
-  // Peek featured WITHOUT consuming timeline
   function peekFeaturedSet(){
     const pCount = focusedPhotoCount();
     const vCount = focusedVideoCount();
@@ -702,7 +690,6 @@
     return { photos, videos };
   }
 
-  // Extras do not consume timeline; safe to compute for preload
   function peekExtrasSet(){
     return getExtrasSet(extrasCount());
   }
@@ -868,10 +855,10 @@
       v.appendChild(source);
 
       mediaSlot.appendChild(v);
-      setTimeout(() => v.play().catch(()=>{}), 80);
+      requestAnimationFrame(() => v.play().catch(()=>{}));
     } else {
       const img = document.createElement("img");
-      img.loading = "eager";         // featured/extras already preloaded, so eager is fine
+      img.loading = "eager";
       img.decoding = "async";
       img.alt = "Photo";
 
@@ -949,7 +936,6 @@
 
     setBackgroundFromItem(featured.videos[0] || featured.photos[0]);
 
-    // Photos first (top row), then videos (bottom row)
     featured.photos.forEach(p => {
       featuredEl.appendChild(createPolaroid(p, false, { fitPhoto: !isDesktop() }));
     });
@@ -979,7 +965,6 @@
     videoCursor = 0;
     closeViewer();
 
-    // no-flash preload for the initial set
     const featuredPeek = peekFeaturedSet();
     const extrasPeek = peekExtrasSet();
     await preloadSetAsync(featuredPeek, extrasPeek);
@@ -993,14 +978,10 @@
 
     closeViewer();
 
-    // Peek next set (no cursor change)
     const featuredPeek = peekFeaturedSet();
     const extrasPeek = peekExtrasSet();
-
-    // Preload the exact next set (no flash)
     await preloadSetAsync(featuredPeek, extrasPeek);
 
-    // Now render, consuming timeline
     renderAll();
 
     advancing = false;
@@ -1033,14 +1014,16 @@
     window.__rz = setTimeout(() => renderAll(), 150);
   });
 
-  // Starfield
+  // Starfield (subtle but immersive shooting stars)
   const starCanvas = document.getElementById("starCanvas");
   const starCtx = starCanvas.getContext("2d");
   let SW=0, SH=0, SDPR=1;
   const stars = [];
   const STAR_COUNT = 300;
   let driftX=0, driftY=0;
-  let streak=null;
+
+  let streaks = [];
+  const MAX_STREAKS = 2;
 
   function resizeStars(){
     SDPR = Math.min(2, window.devicePixelRatio || 1);
@@ -1068,15 +1051,19 @@
   }
 
   function maybeSpawnStreak(){
-    if(streak || Math.random() > 0.006) return;
-    streak = {
-      x: Math.random()*SW*0.6,
-      y: Math.random()*SH*0.5,
-      vx: 10 + Math.random()*8,
-      vy: 6 + Math.random()*6,
+    if(streaks.length >= MAX_STREAKS) return;
+    if(Math.random() > 0.014) return;
+
+    const fromLeft = Math.random() < 0.5;
+
+    streaks.push({
+      x: fromLeft ? Math.random()*SW*0.2 : Math.random()*SW*0.8 + SW*0.2,
+      y: Math.random()*SH,
+      vx: (fromLeft ? 1 : -1) * (12 + Math.random()*8),
+      vy: 7 + Math.random()*7,
       life: 0,
       max: 20 + Math.random()*14
-    };
+    });
   }
 
   function drawStars(){
@@ -1106,19 +1093,25 @@
     }
 
     maybeSpawnStreak();
-    if(streak){
-      streak.life++;
-      streak.x += streak.vx;
-      streak.y += streak.vy;
+    if(streaks.length){
+      for(const st of streaks){
+        st.life++;
+        st.x += st.vx;
+        st.y += st.vy;
 
-      starCtx.strokeStyle = `rgba(190,245,255,${0.6*(1-streak.life/streak.max)})`;
-      starCtx.lineWidth = 2;
-      starCtx.beginPath();
-      starCtx.moveTo(streak.x, streak.y);
-      starCtx.lineTo(streak.x - streak.vx*2.5, streak.y - streak.vy*2.5);
-      starCtx.stroke();
+        starCtx.strokeStyle = `rgba(190,245,255,${0.65*(1 - st.life/st.max)})`;
+        starCtx.lineWidth = 2;
+        starCtx.beginPath();
+        starCtx.moveTo(st.x, st.y);
+        starCtx.lineTo(st.x - st.vx*2.2, st.y - st.vy*2.2);
+        starCtx.stroke();
+      }
 
-      if(streak.life > streak.max) streak = null;
+      streaks = streaks.filter(st =>
+        st.life <= st.max &&
+        st.x > -200 && st.x < SW + 200 &&
+        st.y > -200 && st.y < SH + 200
+      );
     }
 
     requestAnimationFrame(drawStars);
@@ -1129,7 +1122,6 @@
   initStars();
   drawStars();
 
-  // Initial render with no-flash preload
   (async () => {
     await restart();
     if(autoToggle.checked) startAuto();
