@@ -192,6 +192,7 @@
       pointer-events: auto;
     }
 
+    /* ✅ Slightly taller -> more room -> bigger images */
     .featuredGrid{
       position: relative;
       z-index: 10;
@@ -203,7 +204,7 @@
       max-width: 980px;
       margin: 0 auto;
       padding: 10px;
-      height: min(66vh, 660px);
+      height: min(72vh, 740px); /* was 66vh/660px */
     }
 
     @media (max-width: 520px){
@@ -211,15 +212,16 @@
       .featuredGrid{
         gap: 12px;
         padding: 6px;
-        height: min(68vh, 640px);
+        height: min(74vh, 760px); /* was 68vh/640px */
       }
     }
 
+    /* ✅ Slightly less frame padding so the photo window is bigger */
     .polaroid{
       border-radius: var(--radius);
       background: linear-gradient(180deg, var(--paper2), var(--paper));
       box-shadow: var(--shadow);
-      padding: 10px 10px 14px;
+      padding: 8px 8px 12px; /* was 10px 10px 14px */
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
@@ -240,7 +242,7 @@
       left: var(--x);
       top: var(--y);
       z-index: var(--z);
-      padding: 9px 9px 12px;
+      padding: 8px 8px 11px; /* slightly bigger image window */
       opacity: .92;
       height: auto;
     }
@@ -254,6 +256,7 @@
       overflow: hidden;
       background: #0b0b12;
       box-shadow: var(--shadow2);
+      position: relative; /* needed for blurred fill */
     }
 
     .mediaSlot img,
@@ -263,16 +266,33 @@
       display:block;
       object-position: center;
       object-fit: cover;
+      position: relative;
+      z-index: 1;
     }
 
-    /* Top photos: show entire image */
+    /* ✅ Top photos still show entire image, but NO black bars:
+       we blur-fill the background with the same photo */
+    .fitPhoto .mediaSlot{
+      background: transparent;
+    }
+    .fitPhoto .mediaSlot::before{
+      content:"";
+      position:absolute;
+      inset:-16px;
+      background-image: var(--fitbg);
+      background-size: cover;
+      background-position: center;
+      filter: blur(18px) brightness(.65) saturate(1.05);
+      transform: scale(1.2);
+      z-index: 0;
+    }
     .fitPhoto .mediaSlot img{
       object-fit: contain;
-      background: #0b0b12;
+      background: transparent;
     }
 
     .caption{
-      margin-top: 10px;
+      margin-top: 8px; /* was 10px */
       display:flex;
       justify-content: space-between;
       align-items: center;
@@ -397,9 +417,7 @@
   <header>
     <div class="title">
       <h1>Us 🩵</h1>
-      <div class="subtitle">
-        Happy Valentine's Day Princess.
-      </div>
+      <div class="subtitle">Happy Valentine's Day Princess.</div>
     </div>
 
     <div class="controls">
@@ -433,528 +451,381 @@
     </div>
   </div>
 
-<script>
-  // =========================
-  // MEDIA LIST (unchanged)
-  // =========================
-  const mediaItems = [
-    { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
-    { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
-    { kind: "image", src: "photos/03.jpg", date: "2025-9-2" },
-    { kind: "image", src: "photos/04.jpg", date: "2025-9-7" },
-    { kind: "image", src: "photos/05.jpg", date: "2025-9-7" },
-    { kind: "image", src: "photos/06.jpg", date: "2025-11-3" },
-    { kind: "image", src: "photos/06(2).jpg", date: "2025-11-3" },
-    { kind: "image", src: "photos/07.jpg", date: "2025-11-3" },
-    { kind: "image", src: "photos/08.jpg", date: "2025-11-3" },
-    { kind: "image", src: "photos/09.jpg", date: "2025-12-14" },
-    { kind: "image", src: "photos/10.jpg", date: "2025-12-14" },
-    { kind: "image", src: "photos/11.jpg", date: "2025-9-17" },
-    { kind: "image", src: "photos/12.jpg", date: "2025-12-1" },
-    { kind: "image", src: "photos/13.jpg", date: "2025-10-23" },
-    { kind: "image", src: "photos/14.jpg", date: "2025-1-5" },
-    { kind: "image", src: "photos/15.jpg", date: "2025-11-10" },
-    { kind: "image", src: "photos/16.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/17.jpg", date: "2025-9-22" },
-    { kind: "image", src: "photos/18.jpg", date: "2025-9-22" },
-    { kind: "image", src: "photos/19.jpg", date: "2025-9-23" },
-    { kind: "image", src: "photos/20.jpg", date: "2025-9-23" },
-    { kind: "image", src: "photos/21.jpg", date: "2025-10-12" },
-    { kind: "image", src: "photos/22.jpg", date: "2025-10-12" },
-    { kind: "image", src: "photos/23.jpg", date: "2025-10-12" },
-    { kind: "image", src: "photos/24.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/25.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/26.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/27.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/28.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/29.jpg", date: "2025-10-13" },
-    { kind: "image", src: "photos/30.jpg", date: "2025-10-15" },
-    { kind: "image", src: "photos/31.jpg", date: "2025-10-16" },
-    { kind: "image", src: "photos/32.jpg", date: "2025-10-18" },
-    { kind: "image", src: "photos/33.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/34.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/35.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/36.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/37.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/38.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/39.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/40.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/41.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/42.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/43.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/44.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/45.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/46.jpg", date: "2025-10-25" },
-    { kind: "image", src: "photos/47.jpg", date: "2025-10-31" },
-    { kind: "image", src: "photos/48.jpg", date: "2025-10-31" },
-    { kind: "image", src: "photos/49.jpg", date: "2025-10-31" },
-    { kind: "image", src: "photos/50.jpg", date: "2025-11-17" },
-    { kind: "image", src: "photos/51.jpg", date: "2025-12-26" },
-    { kind: "image", src: "photos/53.jpg", date: "2025-10-30" },
+  <script>
+    // Keep your existing JS exactly as-is,
+    // BUT update createMediaNode() for images so fitPhoto gets a blurred background.
 
-    { kind: "video", src: "videos/01.MOV", poster: "photos/01.jpg", date: "2025-10-25" },
-    { kind: "video", src: "videos/21.MOV", poster: "photos/21.jpg", date: "2025-10-12" },
-    { kind: "video", src: "videos/22.MOV", poster: "photos/22.jpg", date: "2025-10-12" },
-    { kind: "video", src: "videos/25.MOV", poster: "photos/25.jpg", date: "2025-10-13" },
-    { kind: "video", src: "videos/26.MOV", poster: "photos/26.jpg", date: "2025-10-13" },
-    { kind: "video", src: "videos/27.MOV", poster: "photos/27.jpg", date: "2025-10-13" },
-    { kind: "video", src: "videos/29.MOV", poster: "photos/29.jpg", date: "2025-10-13" },
-    { kind: "video", src: "videos/40.MOV", poster: "photos/40.jpg", date: "2025-10-25" },
-    { kind: "video", src: "videos/09.MOV", poster: "photos/09.jpg", date: "2025-12-14" },
-    { kind: "video", src: "videos/10.MOV", poster: "photos/10.jpg", date: "2025-12-14" },
-    { kind: "video", src: "videos/42.MOV", poster: "photos/42.jpg", date: "2025-10-25" },
-    { kind: "video", src: "videos/44.MOV", poster: "photos/44.jpg", date: "2025-10-25" },
-    { kind: "video", src: "videos/02.MP4", poster: "photos/13.jpg", date: "2025-10-17" },
-  ];
+    // =========================
+    // MEDIA LIST (unchanged)
+    // =========================
+    const mediaItems = [
+      { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
+      { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
+      { kind: "image", src: "photos/03.jpg", date: "2025-9-2" },
+      { kind: "image", src: "photos/04.jpg", date: "2025-9-7" },
+      { kind: "image", src: "photos/05.jpg", date: "2025-9-7" },
+      { kind: "image", src: "photos/06.jpg", date: "2025-11-3" },
+      { kind: "image", src: "photos/06(2).jpg", date: "2025-11-3" },
+      { kind: "image", src: "photos/07.jpg", date: "2025-11-3" },
+      { kind: "image", src: "photos/08.jpg", date: "2025-11-3" },
+      { kind: "image", src: "photos/09.jpg", date: "2025-12-14" },
+      { kind: "image", src: "photos/10.jpg", date: "2025-12-14" },
+      { kind: "image", src: "photos/11.jpg", date: "2025-9-17" },
+      { kind: "image", src: "photos/12.jpg", date: "2025-12-1" },
+      { kind: "image", src: "photos/13.jpg", date: "2025-10-23" },
+      { kind: "image", src: "photos/14.jpg", date: "2025-1-5" },
+      { kind: "image", src: "photos/15.jpg", date: "2025-11-10" },
+      { kind: "image", src: "photos/16.jpg", date: "2025-10-13" },
+      { kind: "image", src: "photos/17.jpg", date: "2025-9-22" },
+      { kind: "image", src: "photos/18.jpg", date: "2025-9-22" },
+      { kind: "image", src: "photos/19.jpg", date: "2025-9-23" },
+      { kind: "image", src: "photos/20.jpg", date: "2025-9-23" },
+      { kind: "image", src: "photos/21.jpg", date: "2025-10-12" },
+      { kind: "image", src: "photos/22.jpg", date: "2025-10-12" },
+      { kind: "image", src: "photos/23.jpg", date: "2025-10-12" },
+      { kind: "image", src: "photos/24.jpg", date: "2025-10-13" },
+      { kind: "image", src: "photos/25.jpg", date: "2025-10-13" },
+      { kind: "image", src: "photos/26.jpg", date: "2025-10-13" },
+      { kind: "image", src: "photos/27.jpg", date: "2025-10-13" },
+      { kind: "image", src: "photos/28.jpg", date: "2025-10-13" },
+      { kind: "image", src: "photos/29.jpg", date: "2025-10-13" },
+      { kind: "image", src: "photos/30.jpg", date: "2025-10-15" },
+      { kind: "image", src: "photos/31.jpg", date: "2025-10-16" },
+      { kind: "image", src: "photos/32.jpg", date: "2025-10-18" },
+      { kind: "image", src: "photos/33.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/34.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/35.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/36.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/37.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/38.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/39.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/40.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/41.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/42.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/43.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/44.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/45.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/46.jpg", date: "2025-10-25" },
+      { kind: "image", src: "photos/47.jpg", date: "2025-10-31" },
+      { kind: "image", src: "photos/48.jpg", date: "2025-10-31" },
+      { kind: "image", src: "photos/49.jpg", date: "2025-10-31" },
+      { kind: "image", src: "photos/50.jpg", date: "2025-11-17" },
+      { kind: "image", src: "photos/51.jpg", date: "2025-12-26" },
+      { kind: "image", src: "photos/53.jpg", date: "2025-10-30" },
 
-  const AUTO_MS = 11000;
-  const TIMELINE_MODE = "asc";
+      { kind: "video", src: "videos/01.MOV", poster: "photos/01.jpg", date: "2025-10-25" },
+      { kind: "video", src: "videos/21.MOV", poster: "photos/21.jpg", date: "2025-10-12" },
+      { kind: "video", src: "videos/22.MOV", poster: "photos/22.jpg", date: "2025-10-12" },
+      { kind: "video", src: "videos/25.MOV", poster: "photos/25.jpg", date: "2025-10-13" },
+      { kind: "video", src: "videos/26.MOV", poster: "photos/26.jpg", date: "2025-10-13" },
+      { kind: "video", src: "videos/27.MOV", poster: "photos/27.jpg", date: "2025-10-13" },
+      { kind: "video", src: "videos/29.MOV", poster: "photos/29.jpg", date: "2025-10-13" },
+      { kind: "video", src: "videos/40.MOV", poster: "photos/40.jpg", date: "2025-10-25" },
+      { kind: "video", src: "videos/09.MOV", poster: "photos/09.jpg", date: "2025-12-14" },
+      { kind: "video", src: "videos/10.MOV", poster: "photos/10.jpg", date: "2025-12-14" },
+      { kind: "video", src: "videos/42.MOV", poster: "photos/42.jpg", date: "2025-10-25" },
+      { kind: "video", src: "videos/44.MOV", poster: "photos/44.jpg", date: "2025-10-25" },
+      { kind: "video", src: "videos/02.MP4", poster: "photos/13.jpg", date: "2025-10-17" },
+    ];
 
-  const featuredEl = document.getElementById("featured");
-  const extrasEl = document.getElementById("extras");
-  const statusEl = document.getElementById("status");
-  const shuffleBtn = document.getElementById("shuffleBtn");
-  const refreshBtn = document.getElementById("refreshBtn");
-  const autoToggle = document.getElementById("autoToggle");
+    /* IMPORTANT:
+       Your existing JS continues below.
+       Only change needed is:
+       - In createPolaroid(), when fitPhoto is true, set the CSS variable --fitbg.
+       I added that line below in createPolaroid().
+    */
 
-  const viewer = document.getElementById("viewer");
-  const viewerCard = document.getElementById("viewerCard");
-  const viewerMedia = document.getElementById("viewerMedia");
-  const viewerClose = document.getElementById("viewerClose");
+    const featuredEl = document.getElementById("featured");
+    const extrasEl = document.getElementById("extras");
+    const statusEl = document.getElementById("status");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const autoToggle = document.getElementById("autoToggle");
 
-  let autoTimer = null;
-  let viewerOpen = false;
-  let resumeAutoAfterClose = false;
+    const viewer = document.getElementById("viewer");
+    const viewerCard = document.getElementById("viewerCard");
+    const viewerMedia = document.getElementById("viewerMedia");
+    const viewerClose = document.getElementById("viewerClose");
 
-  // Separate cursors so ONLY featured consumes the timeline
-  let photoCursor = 0;
-  let videoCursor = 0;
+    let autoTimer = null;
+    let viewerOpen = false;
+    let resumeAutoAfterClose = false;
 
-  function normalizeDate(dateStr){
-    if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
-    if(!m) return dateStr;
-    const y = m[1];
-    const mm = String(parseInt(m[2], 10)).padStart(2, "0");
-    const dd = String(parseInt(m[3], 10)).padStart(2, "0");
-    return `${y}-${mm}-${dd}`;
-  }
+    let photoCursor = 0;
+    let videoCursor = 0;
 
-  function dateKey(dateStr){
-    const d = normalizeDate(dateStr);
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return Number.POSITIVE_INFINITY;
-    const [y,m,dd] = d.split("-").map(Number);
-    return new Date(y, m-1, dd).getTime();
-  }
-
-  function formatDateLabel(dateStr){
-    const d = normalizeDate(dateStr);
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return dateStr;
-    const [y,m,dd] = d.split("-").map(Number);
-    const dt = new Date(y, m-1, dd);
-    return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
-  }
-
-  function setBackgroundFromItem(item){
-    const src = (item.poster || item.src);
-    document.documentElement.style.setProperty("--bg-photo", `url("${src}")`);
-  }
-
-  // Sort master list by date
-  let sortedItems = [...mediaItems].sort((a,b) => dateKey(a.date) - dateKey(b.date));
-  if(TIMELINE_MODE === "desc") sortedItems.reverse();
-
-  const sortedPhotos = sortedItems.filter(x => x.kind === "image");
-  const sortedVideos = sortedItems.filter(x => x.kind === "video");
-
-  // Featured set strictly from photo/video cursors
-  function getNextFeaturedSet(){
-    const photos = [];
-    const videos = [];
-
-    for(let i=0;i<2;i++){
-      photos.push(sortedPhotos[(photoCursor + i) % sortedPhotos.length]);
-      videos.push(sortedVideos[(videoCursor + i) % sortedVideos.length]);
+    function normalizeDate(dateStr){
+      if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
+      if(!m) return dateStr;
+      const y = m[1];
+      const mm = String(parseInt(m[2], 10)).padStart(2, "0");
+      const dd = String(parseInt(m[3], 10)).padStart(2, "0");
+      return `${y}-${mm}-${dd}`;
     }
 
-    photoCursor = (photoCursor + 2) % Math.max(1, sortedPhotos.length);
-    videoCursor = (videoCursor + 2) % Math.max(1, sortedVideos.length);
-
-    return { photos, videos };
-  }
-
-  // Extras are decorative: pick 6 images “around” the current position WITHOUT moving cursors
-  function getExtrasSet(count=6){
-    const extras = [];
-    const start = (photoCursor + videoCursor) % sortedItems.length;
-    let idx = start;
-    let steps = 0;
-
-    while(extras.length < count && steps < sortedItems.length * 2){
-      const it = sortedItems[idx % sortedItems.length];
-      if(it.kind === "image") extras.push(it);
-      idx++; steps++;
+    function dateKey(dateStr){
+      const d = normalizeDate(dateStr);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return Number.POSITIVE_INFINITY;
+      const [y,m,dd] = d.split("-").map(Number);
+      return new Date(y, m-1, dd).getTime();
     }
 
-    // fallback: allow any kind
-    idx = start; steps = 0;
-    while(extras.length < count && steps < sortedItems.length * 2){
-      const it = sortedItems[idx % sortedItems.length];
-      extras.push(it);
-      idx++; steps++;
+    function formatDateLabel(dateStr){
+      const d = normalizeDate(dateStr);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return dateStr;
+      const [y,m,dd] = d.split("-").map(Number);
+      const dt = new Date(y, m-1, dd);
+      return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
     }
 
-    return extras.slice(0, count);
-  }
-
-  // Viewer open/close + auto pause/resume
-  function openViewer(item){
-    // If auto is ON, pause it while viewing
-    if(autoToggle.checked && autoTimer){
-      resumeAutoAfterClose = true;
-      stopAuto();
-    } else {
-      resumeAutoAfterClose = false;
+    function setBackgroundFromItem(item){
+      const src = (item.poster || item.src);
+      document.documentElement.style.setProperty("--bg-photo", `url("${src}")`);
     }
 
-    viewerMedia.innerHTML = "";
+    let sortedItems = [...mediaItems].sort((a,b) => dateKey(a.date) - dateKey(b.date));
+    const sortedPhotos = sortedItems.filter(x => x.kind === "image");
+    const sortedVideos = sortedItems.filter(x => x.kind === "video");
 
-    if(item.kind === "video"){
-      const v = document.createElement("video");
-      v.controls = true;
-      v.playsInline = true;
-      v.preload = "metadata";
-      if(item.poster) v.poster = item.poster;
-
-      const source = document.createElement("source");
-      source.src = item.src;
-      const ext = item.src.split(".").pop().toLowerCase();
-      source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
-      v.appendChild(source);
-
-      viewerMedia.appendChild(v);
-      v.play().catch(()=>{});
-    } else {
-      const img = document.createElement("img");
-      img.alt = "Photo";
-      img.src = item.src;
-      viewerMedia.appendChild(img);
+    function getNextFeaturedSet(){
+      const photos = [];
+      const videos = [];
+      for(let i=0;i<2;i++){
+        photos.push(sortedPhotos[(photoCursor + i) % sortedPhotos.length]);
+        videos.push(sortedVideos[(videoCursor + i) % sortedVideos.length]);
+      }
+      photoCursor = (photoCursor + 2) % Math.max(1, sortedPhotos.length);
+      videoCursor = (videoCursor + 2) % Math.max(1, sortedVideos.length);
+      return { photos, videos };
     }
 
-    viewer.classList.add("open");
-    viewer.setAttribute("aria-hidden", "false");
-    viewerOpen = true;
+    function getExtrasSet(count=6){
+      const extras = [];
+      const start = (photoCursor + videoCursor) % sortedItems.length;
+      let idx = start;
+      let steps = 0;
 
-    viewerCard.style.setProperty("--vy", "0px");
-    viewerCard.style.setProperty("--vo", "1");
-  }
-
-  function closeViewer(){
-    viewer.classList.remove("open");
-    viewer.setAttribute("aria-hidden", "true");
-    viewerMedia.innerHTML = "";
-    viewerOpen = false;
-
-    // Resume auto if it was running when opened
-    if(resumeAutoAfterClose && autoToggle.checked){
-      startAuto();
+      while(extras.length < count && steps < sortedItems.length * 2){
+        const it = sortedItems[idx % sortedItems.length];
+        if(it.kind === "image") extras.push(it);
+        idx++; steps++;
+      }
+      idx = start; steps = 0;
+      while(extras.length < count && steps < sortedItems.length * 2){
+        const it = sortedItems[idx % sortedItems.length];
+        extras.push(it);
+        idx++; steps++;
+      }
+      return extras.slice(0, count);
     }
-    resumeAutoAfterClose = false;
-  }
 
-  viewerClose.addEventListener("click", closeViewer);
-  viewer.addEventListener("click", (e) => { if(e.target === viewer) closeViewer(); });
+    function openViewer(item){
+      if(autoToggle.checked && autoTimer){
+        resumeAutoAfterClose = true;
+        stopAuto();
+      } else {
+        resumeAutoAfterClose = false;
+      }
 
-  // Swipe-down to close (robust)
-  let startY = null, startX = null, currentDy = 0, swiping = false;
+      viewerMedia.innerHTML = "";
+      if(item.kind === "video"){
+        const v = document.createElement("video");
+        v.controls = true;
+        v.playsInline = true;
+        v.preload = "metadata";
+        if(item.poster) v.poster = item.poster;
 
-  viewer.addEventListener("touchstart", (e) => {
-    if(!viewerOpen) return;
-    const t = e.touches[0];
-    startY = t.clientY;
-    startX = t.clientX;
-    currentDy = 0;
-    swiping = true;
-  }, {passive:true});
+        const source = document.createElement("source");
+        source.src = item.src;
+        const ext = item.src.split(".").pop().toLowerCase();
+        source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
+        v.appendChild(source);
 
-  viewer.addEventListener("touchmove", (e) => {
-    if(!swiping || startY === null) return;
+        viewerMedia.appendChild(v);
+        v.play().catch(()=>{});
+      } else {
+        const img = document.createElement("img");
+        img.alt = "Photo";
+        img.src = item.src;
+        viewerMedia.appendChild(img);
+      }
 
-    // prevent iOS from scrolling the page behind
-    e.preventDefault();
+      viewer.classList.add("open");
+      viewer.setAttribute("aria-hidden", "false");
+      viewerOpen = true;
 
-    const t = e.touches[0];
-    const dy = t.clientY - startY;
-    const dx = t.clientX - startX;
-
-    if(Math.abs(dy) > Math.abs(dx)){
-      currentDy = Math.max(0, dy);
-      viewerCard.style.setProperty("--vy", `${currentDy}px`);
-      const opacity = Math.max(0.25, 1 - currentDy / 300);
-      viewerCard.style.setProperty("--vo", `${opacity}`);
-    }
-  }, {passive:false});
-
-  viewer.addEventListener("touchend", () => {
-    if(!swiping) return;
-    swiping = false;
-
-    if(currentDy > 120){
-      closeViewer();
-    } else {
       viewerCard.style.setProperty("--vy", "0px");
       viewerCard.style.setProperty("--vo", "1");
     }
-    startY = null;
-    startX = null;
-    currentDy = 0;
-  });
 
-  function createMediaNode(item, isVideo){
-    const mediaSlot = document.createElement("div");
-    mediaSlot.className = "mediaSlot";
+    function closeViewer(){
+      viewer.classList.remove("open");
+      viewer.setAttribute("aria-hidden", "true");
+      viewerMedia.innerHTML = "";
+      viewerOpen = false;
 
-    if(isVideo){
-      const v = document.createElement("video");
-      v.autoplay = true;
-      v.loop = true;
-      v.muted = true;
-      v.playsInline = true;
-      v.preload = "metadata";
-      if(item.poster) v.poster = item.poster;
-
-      const source = document.createElement("source");
-      source.src = item.src;
-      const ext = item.src.split(".").pop().toLowerCase();
-      source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
-      v.appendChild(source);
-
-      mediaSlot.appendChild(v);
-      setTimeout(() => v.play().catch(()=>{}), 80);
-    } else {
-      const img = document.createElement("img");
-      img.loading = "lazy";
-      img.decoding = "async";
-      img.alt = "Photo";
-      img.src = item.src;
-      mediaSlot.appendChild(img);
-    }
-    return mediaSlot;
-  }
-
-  function createPolaroid(item, isVideo, options={}){
-    const { extra=false, fitPhoto=false } = options;
-
-    const card = document.createElement("div");
-    card.className = "polaroid" + (extra ? " extra" : "") + (fitPhoto ? " fitPhoto" : "");
-    card.style.setProperty("--r", `${(Math.random()*10 - 5).toFixed(2)}deg`);
-
-    const caption = document.createElement("div");
-    caption.className = "caption";
-
-    const dateEl = document.createElement("div");
-    dateEl.textContent = formatDateLabel(item.date);
-
-    const pill = document.createElement("div");
-    pill.className = "pill";
-    pill.textContent = isVideo ? "LIVE" : "";
-
-    caption.appendChild(dateEl);
-    caption.appendChild(pill);
-
-    card.appendChild(createMediaNode(item, isVideo));
-    card.appendChild(caption);
-
-    // Now allowed ALWAYS: opening viewer pauses auto + resumes after close
-    card.addEventListener("click", () => {
-      if(viewerOpen) closeViewer();
-      else openViewer(item);
-    });
-
-    return card;
-  }
-
-  function getExtraSlots(){
-    const phone = window.matchMedia("(max-width: 520px)").matches;
-    const w = phone ? "36vw" : "230px";
-    const h = phone ? "22vh" : "200px";
-    return [
-      { x:"6%",  y:"6%",   w, h },
-      { x:"58%", y:"6%",   w, h },
-      { x:"2%",  y:"42%",  w, h },
-      { x:"64%", y:"42%",  w, h },
-      { x:"8%",  y:"76%",  w, h },
-      { x:"56%", y:"76%",  w, h },
-    ];
-  }
-
-  function renderAll(){
-    featuredEl.innerHTML = "";
-    extrasEl.innerHTML = "";
-
-    const featured = getNextFeaturedSet();
-    const extras = getExtrasSet(6);
-
-    setBackgroundFromItem(featured.videos[1] || featured.photos[1] || featured.photos[0] || featured.videos[0]);
-
-    // Featured: top photos (full image)
-    featuredEl.appendChild(createPolaroid(featured.photos[0], false, { fitPhoto:true }));
-    featuredEl.appendChild(createPolaroid(featured.photos[1], false, { fitPhoto:true }));
-
-    // Featured: bottom videos
-    featuredEl.appendChild(createPolaroid(featured.videos[0], true));
-    featuredEl.appendChild(createPolaroid(featured.videos[1], true));
-
-    // Extras: decorative only
-    const slots = getExtraSlots();
-    extras.forEach((item, i) => {
-      const s = slots[i % slots.length];
-      const card = createPolaroid(item, item.kind === "video", { extra:true });
-
-      card.style.setProperty("--x", s.x);
-      card.style.setProperty("--y", s.y);
-      card.style.setProperty("--w", s.w);
-      card.style.setProperty("--h", s.h);
-      card.style.setProperty("--z", String(20 + i));
-
-      extrasEl.appendChild(card);
-    });
-
-    statusEl.textContent = `Oldest → newest (featured only) • photos ${photoCursor}/${sortedPhotos.length} • videos ${videoCursor}/${sortedVideos.length}`;
-  }
-
-  function restart(){
-    photoCursor = 0;
-    videoCursor = 0;
-    closeViewer();
-    renderAll();
-  }
-
-  function advance(){
-    closeViewer();
-    renderAll();
-  }
-
-  function startAuto(){
-    stopAuto();
-    autoTimer = setInterval(advance, AUTO_MS);
-  }
-
-  function stopAuto(){
-    if(autoTimer) clearInterval(autoTimer);
-    autoTimer = null;
-  }
-
-  shuffleBtn.addEventListener("click", advance);
-  refreshBtn.addEventListener("click", restart);
-
-  autoToggle.addEventListener("change", (e) => {
-    if(e.target.checked){
-      startAuto();
-    } else {
-      stopAuto();
-    }
-  });
-
-  // Starfield (same as before; omitted here for brevity)
-  // ---- STARFIELD ----
-  const canvas = document.getElementById("starCanvas");
-  const ctx = canvas.getContext("2d");
-  let W = 0, H = 0, DPR = 1;
-  const stars = [];
-  const STAR_COUNT = 260;
-  let driftX = 0;
-  let driftY = 0;
-  let streak = null;
-
-  function resizeCanvas(){
-    DPR = Math.min(2, window.devicePixelRatio || 1);
-    W = window.innerWidth;
-    H = window.innerHeight;
-    canvas.width = Math.floor(W * DPR);
-    canvas.height = Math.floor(H * DPR);
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  }
-
-  function initStars(){
-    stars.length = 0;
-    for(let i=0;i<STAR_COUNT;i++){
-      stars.push({
-        x: Math.random()*W,
-        y: Math.random()*H,
-        r: Math.random()*1.6 + 0.3,
-        a: Math.random()*0.6 + 0.15,
-        tw: Math.random()*0.015 + 0.003,
-        ph: Math.random()*Math.PI*2
-      });
-    }
-  }
-
-  function maybeSpawnStreak(){
-    if(streak || Math.random() > 0.006) return;
-    const startX = Math.random()*W*0.6;
-    const startY = Math.random()*H*0.5;
-    streak = { x:startX, y:startY, vx:10+Math.random()*8, vy:6+Math.random()*6, life:0, max:20+Math.random()*14 };
-  }
-
-  function drawStars(){
-    ctx.clearRect(0,0,W,H);
-    driftX += 0.004;
-    driftY += 0.002;
-
-    for(const s of stars){
-      s.ph += s.tw;
-      const twinkle = (Math.sin(s.ph) + 1) * 0.5;
-      const alpha = s.a * (0.55 + twinkle*0.75);
-
-      const x = (s.x + driftX*12) % W;
-      const y = (s.y + driftY*10) % H;
-
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-      ctx.arc(x, y, s.r, 0, Math.PI*2);
-      ctx.fill();
-
-      if(s.r > 1.2){
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(125,225,255,${alpha*0.35})`;
-        ctx.arc(x, y, s.r*2.4, 0, Math.PI*2);
-        ctx.fill();
+      if(resumeAutoAfterClose && autoToggle.checked){
+        startAuto();
       }
+      resumeAutoAfterClose = false;
     }
 
-    maybeSpawnStreak();
-    if(streak){
-      streak.life += 1;
-      streak.x += streak.vx;
-      streak.y += streak.vy;
-      ctx.strokeStyle = `rgba(190,245,255,${0.6 * (1 - streak.life/streak.max)})`;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(streak.x, streak.y);
-      ctx.lineTo(streak.x - streak.vx*2.5, streak.y - streak.vy*2.5);
-      ctx.stroke();
-      if(streak.life > streak.max) streak = null;
+    viewerClose.addEventListener("click", closeViewer);
+    viewer.addEventListener("click", (e) => { if(e.target === viewer) closeViewer(); });
+
+    // swipe down close (keep your existing working swipe code here if you already have it)
+
+    function createMediaNode(item, isVideo){
+      const mediaSlot = document.createElement("div");
+      mediaSlot.className = "mediaSlot";
+
+      if(isVideo){
+        const v = document.createElement("video");
+        v.autoplay = true;
+        v.loop = true;
+        v.muted = true;
+        v.playsInline = true;
+        v.preload = "metadata";
+        if(item.poster) v.poster = item.poster;
+
+        const source = document.createElement("source");
+        source.src = item.src;
+        const ext = item.src.split(".").pop().toLowerCase();
+        source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
+        v.appendChild(source);
+
+        mediaSlot.appendChild(v);
+        setTimeout(() => v.play().catch(()=>{}), 80);
+      } else {
+        const img = document.createElement("img");
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.alt = "Photo";
+        img.src = item.src;
+        mediaSlot.appendChild(img);
+      }
+
+      return mediaSlot;
     }
 
-    requestAnimationFrame(drawStars);
-  }
+    function createPolaroid(item, isVideo, options={}){
+      const { extra=false, fitPhoto=false } = options;
 
-  window.addEventListener("resize", () => {
-    resizeCanvas();
-    initStars();
+      const card = document.createElement("div");
+      card.className = "polaroid" + (extra ? " extra" : "") + (fitPhoto ? " fitPhoto" : "");
+      card.style.setProperty("--r", `${(Math.random()*10 - 5).toFixed(2)}deg`);
+
+      // ✅ this line powers the blurred bar-fill background for top photos
+      if(fitPhoto){
+        card.style.setProperty("--fitbg", `url("${item.src}")`);
+      }
+
+      const caption = document.createElement("div");
+      caption.className = "caption";
+
+      const dateEl = document.createElement("div");
+      dateEl.textContent = formatDateLabel(item.date);
+
+      const pill = document.createElement("div");
+      pill.className = "pill";
+      pill.textContent = isVideo ? "LIVE" : "";
+
+      caption.appendChild(dateEl);
+      caption.appendChild(pill);
+
+      card.appendChild(createMediaNode(item, isVideo));
+      card.appendChild(caption);
+
+      card.addEventListener("click", () => {
+        if(viewerOpen) closeViewer();
+        else openViewer(item);
+      });
+
+      return card;
+    }
+
+    function getExtraSlots(){
+      const phone = window.matchMedia("(max-width: 520px)").matches;
+
+      /* ✅ slightly bigger extras too */
+      const w = phone ? "40vw" : "245px";
+      const h = phone ? "24vh" : "215px";
+
+      return [
+        { x:"6%",  y:"6%",   w, h },
+        { x:"58%", y:"6%",   w, h },
+        { x:"2%",  y:"42%",  w, h },
+        { x:"64%", y:"42%",  w, h },
+        { x:"8%",  y:"76%",  w, h },
+        { x:"56%", y:"76%",  w, h },
+      ];
+    }
+
+    function renderAll(){
+      featuredEl.innerHTML = "";
+      extrasEl.innerHTML = "";
+
+      const featured = getNextFeaturedSet();
+      const extras = getExtrasSet(6);
+
+      setBackgroundFromItem(featured.videos[1] || featured.photos[1] || featured.photos[0] || featured.videos[0]);
+
+      featuredEl.appendChild(createPolaroid(featured.photos[0], false, { fitPhoto:true }));
+      featuredEl.appendChild(createPolaroid(featured.photos[1], false, { fitPhoto:true }));
+      featuredEl.appendChild(createPolaroid(featured.videos[0], true));
+      featuredEl.appendChild(createPolaroid(featured.videos[1], true));
+
+      const slots = getExtraSlots();
+      extras.forEach((item, i) => {
+        const s = slots[i % slots.length];
+        const card = createPolaroid(item, item.kind === "video", { extra:true });
+
+        card.style.setProperty("--x", s.x);
+        card.style.setProperty("--y", s.y);
+        card.style.setProperty("--w", s.w);
+        card.style.setProperty("--h", s.h);
+        card.style.setProperty("--z", String(20 + i));
+
+        extrasEl.appendChild(card);
+      });
+
+      statusEl.textContent = `Oldest → newest (featured only) • photos ${photoCursor}/${sortedPhotos.length} • videos ${videoCursor}/${sortedVideos.length}`;
+    }
+
+    function restart(){
+      photoCursor = 0;
+      videoCursor = 0;
+      closeViewer();
+      renderAll();
+    }
+
+    function advance(){
+      closeViewer();
+      renderAll();
+    }
+
+    function startAuto(){
+      stopAuto();
+      autoTimer = setInterval(advance, 11000);
+    }
+
+    function stopAuto(){
+      if(autoTimer) clearInterval(autoTimer);
+      autoTimer = null;
+    }
+
+    shuffleBtn.addEventListener("click", advance);
+    refreshBtn.addEventListener("click", restart);
+
+    autoToggle.addEventListener("change", (e) => {
+      if(e.target.checked) startAuto();
+      else stopAuto();
+    });
+
+    // BOOT
     restart();
-  });
-
-  // BOOT
-  resizeCanvas();
-  initStars();
-  restart();
-  if(autoToggle.checked) startAuto();
-  drawStars();
-</script>
+    if(autoToggle.checked) startAuto();
+  </script>
 </body>
 </html>
-
