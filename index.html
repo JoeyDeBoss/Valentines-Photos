@@ -11,13 +11,13 @@
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.72);
 
-      --paper: #f7f7f5;          /* polaroid frame */
+      --paper: #f7f7f5;
       --paper2: #ffffff;
       --ink: rgba(0,0,0,.78);
-      --shadow: 0 18px 55px rgba(0,0,0,.40);
-      --shadow2: 0 10px 30px rgba(0,0,0,.32);
 
       --radius: 16px;
+      --shadow: 0 16px 45px rgba(0,0,0,.35);
+      --shadow2: 0 10px 26px rgba(0,0,0,.28);
     }
 
     *{ box-sizing: border-box; }
@@ -63,7 +63,7 @@
       color: var(--muted);
       font-size: 14px;
       line-height: 1.35;
-      max-width: 52ch;
+      max-width: 56ch;
     }
 
     .controls{
@@ -116,33 +116,43 @@
       padding-bottom: 18px;
     }
 
-    /* POLAROID "TABLE" */
+    /* Background board like paper */
     .board{
       position: relative;
       width: 100%;
-      min-height: 72vh;
+      min-height: 74vh;
       border-radius: 22px;
-      /* subtle vignette */
       background:
-        radial-gradient(700px 420px at 30% 30%, rgba(255,255,255,.06), transparent 60%),
-        radial-gradient(800px 500px at 80% 55%, rgba(255,255,255,.05), transparent 60%);
+        linear-gradient(rgba(255,255,255,.04), rgba(255,255,255,.02)),
+        radial-gradient(900px 520px at 20% 20%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(1000px 640px at 85% 55%, rgba(255,255,255,.05), transparent 60%);
       overflow: hidden;
-      padding: 8px;
+      padding: 10px;
     }
 
-    /* On iPhone, ensure board height feels right */
+    /* subtle grid texture */
+    .board::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 42px 42px;
+      opacity: .18;
+      pointer-events:none;
+    }
+
     @media (max-width: 520px){
       header{
         align-items: flex-start;
         flex-direction: column;
       }
       .controls{ justify-content: flex-start; }
-      .board{
-        min-height: 74vh;
-      }
+      .board{ min-height: 76vh; }
     }
 
-    /* POLAROID CARD */
+    /* Polaroid */
     .polaroid{
       position: absolute;
       width: var(--w);
@@ -153,23 +163,23 @@
       border-radius: var(--radius);
       background: linear-gradient(180deg, var(--paper2), var(--paper));
       box-shadow: var(--shadow);
-      padding: 10px 10px 16px;
+      padding: 10px 10px 14px;
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
-      opacity: 1;
       transition:
         left .55s ease,
         top .55s ease,
         transform .55s ease,
-        opacity .35s ease;
+        opacity .25s ease;
+      opacity: 1;
     }
 
-    /* a tiny “paper edge” */
+    /* paper edge */
     .polaroid::after{
       content:"";
       position:absolute;
-      inset: 0;
+      inset:0;
       border-radius: var(--radius);
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
       pointer-events:none;
@@ -177,19 +187,17 @@
 
     .mediaSlot{
       width: 100%;
-      height: calc(100% - 38px);
+      height: calc(100% - 36px);
       border-radius: 12px;
       overflow: hidden;
       background: #111;
       box-shadow: var(--shadow2);
     }
-
-    /* fill like a real printed photo */
     .mediaSlot img,
     .mediaSlot video{
       width:100%;
       height:100%;
-      object-fit: cover;   /* looks best for polaroids */
+      object-fit: cover;
       object-position: center;
       display:block;
     }
@@ -202,21 +210,12 @@
       gap: 10px;
       font-size: 13px;
       color: var(--ink);
-      font-weight: 750;
+      font-weight: 800;
       letter-spacing: .01em;
-      /* “handwritten-ish” fallback */
-      font-family: ui-rounded, "Segoe Print", "Bradley Hand", "Comic Sans MS", system-ui, sans-serif;
+      font-family: ui-rounded, "Segoe Print", "Bradley Hand", system-ui, sans-serif;
     }
 
-    .tag{
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .06em;
-      color: rgba(0,0,0,.60);
-    }
-
-    /* video badge */
-    .live{
+    .pill{
       padding: 4px 8px;
       border-radius: 999px;
       background: rgba(0,0,0,.10);
@@ -225,11 +224,10 @@
       font-weight: 900;
       letter-spacing: .09em;
       text-transform: uppercase;
+      color: rgba(0,0,0,.62);
     }
 
-    /* nicer fading when swapped */
     .swapOut{ opacity: 0; }
-    .swapIn{ opacity: 1; }
 
     footer{
       max-width: 1100px;
@@ -253,7 +251,7 @@
     <div class="title">
       <h1>Us 💙</h1>
       <div class="subtitle">
-        Polaroid collage style — overlapping cards that advance through time (oldest → newest).
+        Polaroid collage — cards overlap a little, but all stay visible. Timeline advances oldest → newest.
       </div>
     </div>
 
@@ -278,10 +276,9 @@
 
 <script>
   // =========================
-  // YOUR MEDIA LIST (kept with your dates)
+  // YOUR MEDIA LIST (as provided)
   // =========================
   const mediaItems = [
-    // Photos
     { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
     { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
     { kind: "image", src: "photos/03.jpg", date: "2025-9-2" },
@@ -336,7 +333,6 @@
     { kind: "image", src: "photos/51.jpg", date: "2025-12-26" },
     { kind: "image", src: "photos/53.jpg", date: "2025-10-30" },
 
-    // Videos
     { kind: "video", src: "videos/01.MOV", poster: "photos/01.jpg", date: "2025-10-25" },
     { kind: "video", src: "videos/21.MOV", poster: "photos/21.jpg", date: "2025-10-12" },
     { kind: "video", src: "videos/22.MOV", poster: "photos/22.jpg", date: "2025-10-12" },
@@ -353,11 +349,11 @@
   ];
 
   // =========================
-  // TIMELINE + SPEED SETTINGS
+  // TIMELINE + SPEED
   // =========================
-  const TIMELINE_MODE = "asc";      // oldest -> newest
-  const AUTO_MS = 9500;            // slower, cozy
-  const SWAP_FRACTION = 0.40;      // make swaps obvious
+  const TIMELINE_MODE = "asc";   // oldest -> newest
+  const AUTO_MS = 9500;         // cozy speed
+  const SWAP_FRACTION = 0.40;   // visible changes each advance
   let timelineIndex = 0;
 
   const board = document.getElementById("board");
@@ -370,16 +366,14 @@
   function isPhone(){
     return window.matchMedia("(max-width: 520px)").matches;
   }
-
-  // Bigger polaroids on phone; show fewer
   function getCardCount(){
-    return isPhone() ? 6 : 10;
+    return isPhone() ? 8 : 12;        // ✅ more visible cards, still readable
   }
   function getMaxVideoCards(){
     return isPhone() ? 2 : 3;
   }
 
-  // Normalize dates like "2025-7-2" -> "2025-07-02" for sorting
+  // Normalize dates like 2025-7-2 -> 2025-07-02 for sorting
   function normalizeDate(dateStr){
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
@@ -428,29 +422,50 @@
     return chunk;
   }
 
-  // Random positions & rotation to feel like a real collage (but keep inside board)
-  function randomLayout(count){
+  // ✅ This layout ensures cards don’t fully cover each other:
+  // We place them into a loose grid of slots, with small overlap + jitter.
+  function slotLayout(count){
     const rect = board.getBoundingClientRect();
     const pad = isPhone() ? 10 : 16;
 
-    // Card sizes (bigger on phone)
-    const w = isPhone() ? Math.min(260, rect.width - 2*pad) : 280;
-    const h = isPhone() ? Math.min(340, rect.height - 2*pad) : 330;
+    // columns based on width
+    const cols = isPhone() ? 2 : (rect.width > 920 ? 4 : 3);
+    const rows = Math.ceil(count / cols);
 
-    const layouts = [];
+    // card sizes (scaled for screen)
+    const maxW = (rect.width - pad*2) / cols;
+    const w = Math.min(isPhone() ? 220 : 240, maxW * 0.95);
+    const h = Math.round(w * 1.18);
+
+    // overlap amount (small, so you can still see all)
+    const overlapX = Math.round(w * 0.18);
+    const overlapY = Math.round(h * 0.18);
+
+    // slot step
+    const stepX = Math.max(10, (rect.width - pad*2 - w) / Math.max(1, cols - 1)) - overlapX;
+    const stepY = Math.max(10, (rect.height - pad*2 - h) / Math.max(1, rows - 1)) - overlapY;
+
+    const slots = [];
     for(let i = 0; i < count; i++){
-      const x = pad + Math.random() * Math.max(1, rect.width  - w - 2*pad);
-      const y = pad + Math.random() * Math.max(1, rect.height - h - 2*pad);
-      const r = (Math.random() * 18 - 9); // -9..+9 degrees
-      const z = 10 + i;
-      layouts.push({ x, y, r, w, h, z });
+      const c = i % cols;
+      const r = Math.floor(i / cols);
+
+      const jitter = isPhone() ? 10 : 14;
+      const x = pad + c * stepX + (Math.random()*jitter - jitter/2);
+      const y = pad + r * stepY + (Math.random()*jitter - jitter/2);
+      const rot = (Math.random() * 14 - 7); // -7..+7
+      const z = 10 + i; // natural stacking order
+
+      slots.push({ x, y, r: rot, w, h, z });
     }
-    return layouts;
+
+    // Shuffle slot assignment to feel organic
+    return shuffleArray(slots);
   }
 
   function createPolaroid(item){
     const card = document.createElement("div");
-    card.className = "polaroid swapIn";
+    card.className = "polaroid";
     card.dataset.kind = item.kind;
     card.dataset.src  = item.src;
 
@@ -463,20 +478,21 @@
     const dateEl = document.createElement("div");
     dateEl.textContent = formatDateLabel(item.date);
 
-    const tag = document.createElement("div");
-    tag.className = "tag";
-    tag.textContent = item.kind === "video" ? "" : "";
+    const pill = document.createElement("div");
+    pill.className = "pill";
+    pill.textContent = item.kind === "video" ? "LIVE" : "";
 
     caption.appendChild(dateEl);
-    caption.appendChild(tag);
+    caption.appendChild(pill);
 
     card.appendChild(mediaSlot);
     card.appendChild(caption);
 
     setMediaIntoCard(card, item);
 
-    // tap/click for video play/pause
+    // tap brings to front + play/pause for video
     card.addEventListener("click", () => {
+      bringToFront(card);
       const v = card.querySelector("video");
       if(v){
         if(v.paused) v.play().catch(()=>{});
@@ -491,11 +507,11 @@
     const mediaSlot = card.querySelector(".mediaSlot");
     mediaSlot.innerHTML = "";
 
-    const captionDate = card.querySelector(".caption > div:first-child");
-    captionDate.textContent = formatDateLabel(item.date);
+    const dateEl = card.querySelector(".caption > div:first-child");
+    dateEl.textContent = formatDateLabel(item.date);
 
-    const captionTag = card.querySelector(".tag");
-    captionTag.textContent = item.kind === "video" ? "LIVE" : "";
+    const pill = card.querySelector(".pill");
+    pill.textContent = item.kind === "video" ? "LIVE" : "";
 
     if(item.kind === "video"){
       const v = document.createElement("video");
@@ -511,17 +527,7 @@
       const ext = item.src.split(".").pop().toLowerCase();
       source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
       v.appendChild(source);
-
       mediaSlot.appendChild(v);
-
-      // show LIVE pill (bottom right)
-      let live = card.querySelector(".live");
-      if(!live){
-        live = document.createElement("div");
-        live.className = "live";
-        live.textContent = "LIVE";
-        card.querySelector(".caption").appendChild(live);
-      }
     } else {
       const img = document.createElement("img");
       img.loading = "lazy";
@@ -529,9 +535,6 @@
       img.alt = "Photo";
       img.src = item.src;
       mediaSlot.appendChild(img);
-
-      const live = card.querySelector(".live");
-      if(live) live.remove();
     }
 
     card.dataset.kind = item.kind;
@@ -547,21 +550,28 @@
     card.style.zIndex = layout.z;
   }
 
+  function bringToFront(card){
+    // raise above others
+    const cards = [...board.querySelectorAll(".polaroid")];
+    const topZ = Math.max(...cards.map(c => parseInt(c.style.zIndex || "10", 10)));
+    card.style.zIndex = topZ + 10;
+  }
+
   function buildBoard(){
     board.innerHTML = "";
     timelineIndex = 0;
 
     const count = Math.min(getCardCount(), mediaItems.length);
     const picked = getNextTimelineChunk(count);
+    const layouts = slotLayout(count);
 
-    const layouts = randomLayout(count);
     picked.forEach((item, i) => {
       const card = createPolaroid(item);
       applyLayout(card, layouts[i]);
       board.appendChild(card);
     });
 
-    statusEl.textContent = `Polaroid collage • oldest → newest • showing ${count}`;
+    statusEl.textContent = `Collage • oldest → newest • showing ${count}`;
   }
 
   function advanceTimeline(){
@@ -599,37 +609,30 @@
       });
     }
 
-    // new random layout for the whole “shake”
-    const newLayouts = randomLayout(cards.length);
+    // new layout for all cards so collage "shifts" like the example
+    const layouts = slotLayout(cards.length);
 
+    // swap selected cards
     indices.forEach((idx, k) => {
       const card = cards[idx];
       card.classList.add("swapOut");
 
       setTimeout(() => {
-        // swap content
-        const next = replacements[k];
-        setMediaIntoCard(card, next);
-
-        // pop it to the top visually
-        card.style.zIndex = 999 + idx;
-
-        // reposition/rotate
-        applyLayout(card, newLayouts[idx]);
-
+        setMediaIntoCard(card, replacements[k]);
+        applyLayout(card, layouts[idx]);
+        bringToFront(card); // swapped cards pop forward slightly
         card.classList.remove("swapOut");
-        card.classList.add("swapIn");
-      }, 220);
+      }, 200);
     });
 
-    // also gently rearrange non-swapped cards for a natural collage “shift”
+    // rearrange the rest (so everything stays visible)
     cards.forEach((card, i) => {
       if(!indices.includes(i)){
-        applyLayout(card, newLayouts[i]);
+        applyLayout(card, layouts[i]);
       }
     });
 
-    statusEl.textContent = `Advancing timeline • swapped ${swapCount} polaroids`;
+    statusEl.textContent = `Advancing timeline • swapped ${swapCount} cards`;
   }
 
   function startAuto(){
@@ -645,10 +648,9 @@
   refreshBtn.addEventListener("click", buildBoard);
   autoToggle.addEventListener("change", (e) => e.target.checked ? startAuto() : stopAuto());
 
-  // Rebuild on rotate/resize so phone layout stays nice
   window.addEventListener("resize", () => {
     clearTimeout(window.__resizeTimer);
-    window.__resizeTimer = setTimeout(buildBoard, 200);
+    window.__resizeTimer = setTimeout(buildBoard, 180);
   });
 
   buildBoard();
