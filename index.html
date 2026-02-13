@@ -290,7 +290,7 @@
       opacity: 1;
     }
 
-    /* ✅ ALL image polaroids get blur background fallback (mobile + desktop) */
+    /* ALL image polaroids get blur background fallback (mobile + desktop) */
     .isImage .mediaSlot{
       background-image: var(--fitbg);
       background-size: cover;
@@ -594,6 +594,19 @@
 
   function isDesktop(){
     return window.matchMedia("(min-width: 900px)").matches;
+  }
+
+  function clampIndex1Based(cursor, total){
+    if(total <= 0) return 0;
+    return (cursor % total) + 1;
+  }
+
+  function setProgressStatus(){
+    const pTotal = sortedPhotos.length;
+    const vTotal = sortedVideos.length;
+    const pPos = clampIndex1Based(photoCursor, pTotal);
+    const vPos = clampIndex1Based(videoCursor, vTotal);
+    statusEl.textContent = `Photos: ${pPos}/${pTotal} • Videos: ${vPos}/${vTotal} • ${isDesktop() ? "PC" : "Mobile"}`;
   }
 
   function normalizeDate(dateStr){
@@ -957,7 +970,7 @@
       });
     }
 
-    statusEl.textContent = `Focused: ${focusedPhotoCount()} photos + ${focusedVideoCount()} videos • ${isDesktop() ? "PC mode" : "Mobile mode"}`;
+    setProgressStatus();
   }
 
   async function restart(){
@@ -1052,7 +1065,7 @@
 
   function maybeSpawnStreak(){
     if(streaks.length >= MAX_STREAKS) return;
-    if(Math.random() > 0.014) return;
+    if(Math.random() > 0.014) return; // subtle but visible
 
     const fromLeft = Math.random() < 0.5;
 
