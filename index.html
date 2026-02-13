@@ -216,7 +216,7 @@
       }
     }
 
-    /* ✅ PC: 8 focused cards (4 photos top, 4 videos bottom) */
+    /* PC: 8 focused cards */
     @media (min-width: 900px){
       .featuredGrid{
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -281,6 +281,15 @@
       z-index: 1;
     }
 
+    /* Smooth fade-in for images */
+    .mediaSlot img{
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+    .mediaSlot img.loaded{
+      opacity: 1;
+    }
+
     /* Mobile top photos: full image + blur fill */
     .fitPhoto .mediaSlot{
       background-image: var(--fitbg);
@@ -305,7 +314,7 @@
       z-index: 1;
     }
 
-    /* Desktop: show whole image in ALL image polaroids (no crop) + blur fill */
+    /* Desktop: show whole image for ALL images (contain + blur fill) */
     @media (min-width: 900px){
       .isImage .mediaSlot{
         background-image: var(--fitbg);
@@ -358,6 +367,7 @@
       white-space: nowrap;
     }
 
+    /* Viewer */
     .viewer{
       position: fixed;
       inset: 0;
@@ -365,8 +375,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
-               max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      padding: 16px;
       background: rgba(0,0,0,.72);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -375,22 +384,28 @@
     .viewer.open{ display: flex; }
 
     .viewerCard{
-      width: min(980px, 96vw);
-      height: min(86vh, 760px);
+      width: min(1100px, 96vw);
+      max-height: calc(100vh - 32px);
+      height: auto;
+
       border-radius: 18px;
       background: rgba(10,12,20,.55);
       box-shadow: 0 22px 80px rgba(0,0,0,.55);
       border: 1px solid rgba(255,255,255,.10);
       overflow: hidden;
       position: relative;
+
+      display: flex;
+      flex-direction: column;
+
       transform: translateY(var(--vy, 0px));
       opacity: var(--vo, 1);
       transition: transform .2s ease, opacity .2s ease;
     }
 
     .viewerMedia{
-      width: 100%;
-      height: 100%;
+      flex: 1;
+      min-height: 0;
       display: grid;
       place-items: center;
       background: rgba(0,0,0,.35);
@@ -398,8 +413,10 @@
 
     .viewerMedia img,
     .viewerMedia video{
-      width: 100%;
-      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
       object-fit: contain;
       background: rgba(0,0,0,.25);
     }
@@ -417,6 +434,7 @@
       border: 1px solid rgba(255,255,255,.12);
       text-shadow: var(--glow);
       user-select:none;
+      z-index: 2;
     }
 
     .viewerClose{
@@ -435,6 +453,7 @@
       place-items:center;
       cursor: pointer;
       text-shadow: var(--glow);
+      z-index: 2;
     }
 
     footer{
@@ -460,9 +479,10 @@
       <div class="subtitle">Happy Valentine's Day Princess. - Something to open when you need to smile.</div>
     </div>
 
+    <!-- Button order: Restart, Advance, Auto -->
     <div class="controls">
-      <button id="shuffleBtn">Advance</button>
       <button id="refreshBtn">Restart</button>
+      <button id="shuffleBtn">Advance</button>
       <label class="toggle" title="Auto advance every few seconds">
         <input id="autoToggle" type="checkbox" checked />
         Auto
@@ -482,6 +502,7 @@
     <div id="status">Loading…</div>
   </footer>
 
+  <!-- Fullscreen viewer -->
   <div class="viewer" id="viewer" aria-hidden="true">
     <div class="viewerCard" id="viewerCard">
       <div class="viewerHint">Swipe down to close (or press Esc)</div>
@@ -491,7 +512,7 @@
   </div>
 
 <script>
-  // ========= MEDIA LIST (unchanged) =========
+  // ========= MEDIA LIST =========
   const mediaItems = [
     { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
     { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
@@ -571,6 +592,7 @@
   const refreshBtn = document.getElementById("refreshBtn");
   const autoToggle = document.getElementById("autoToggle");
 
+  // Viewer
   const viewer = document.getElementById("viewer");
   const viewerCard = document.getElementById("viewerCard");
   const viewerMedia = document.getElementById("viewerMedia");
@@ -580,6 +602,7 @@
   let viewerOpen = false;
   let resumeAutoAfterClose = false;
 
+  // Cursors
   let photoCursor = 0;
   let videoCursor = 0;
 
@@ -624,12 +647,11 @@
 
   function focusedPhotoCount(){ return isDesktop() ? 4 : 2; }
   function focusedVideoCount(){ return isDesktop() ? 4 : 2; }
-  function extrasCount(){ return isDesktop() ? 0 : 6; } // ✅ hide extras on PC
+  function extrasCount(){ return isDesktop() ? 0 : 6; }
 
   function getNextFeaturedSet(){
     const pCount = focusedPhotoCount();
     const vCount = focusedVideoCount();
-
     const photos = [];
     const videos = [];
 
@@ -667,6 +689,7 @@
     return extras.slice(0, count);
   }
 
+  // Viewer open/close + auto pause/resume
   function openViewer(item){
     if(autoToggle.checked && autoTimer){
       resumeAutoAfterClose = true;
@@ -725,8 +748,9 @@
     if(e.key === "Escape" && viewerOpen) closeViewer();
   });
 
-  // Swipe-down to close
-  let startY = null, startX = null, currentDy = 0, swiping = false;
+  // Swipe down to close
+  let startY=null, startX=null, currentDy=0, swiping=false;
+
   viewer.addEventListener("touchstart", (e) => {
     if(!viewerOpen) return;
     const t = e.touches[0];
@@ -742,6 +766,7 @@
     const t = e.touches[0];
     const dy = t.clientY - startY;
     const dx = t.clientX - startX;
+
     if(Math.abs(dy) > Math.abs(dx)){
       currentDy = Math.max(0, dy);
       viewerCard.style.setProperty("--vy", `${currentDy}px`);
@@ -752,15 +777,17 @@
   viewer.addEventListener("touchend", () => {
     if(!swiping) return;
     swiping = false;
-    if(currentDy > 120){
-      closeViewer();
-    } else {
+
+    if(currentDy > 120) closeViewer();
+    else {
       viewerCard.style.setProperty("--vy", "0px");
       viewerCard.style.setProperty("--vo", "1");
     }
-    startY = null; startX = null; currentDy = 0;
+
+    startY=null; startX=null; currentDy=0;
   });
 
+  // Create media nodes (with image fade-in)
   function createMediaNode(item, isVideo){
     const mediaSlot = document.createElement("div");
     mediaSlot.className = "mediaSlot";
@@ -787,9 +814,15 @@
       img.loading = "lazy";
       img.decoding = "async";
       img.alt = "Photo";
+
+      img.onload = () => img.classList.add("loaded");
+      img.onerror = () => img.classList.add("loaded");
+
       img.src = item.src;
       mediaSlot.appendChild(img);
+
       mediaSlot.style.setProperty("--fitbg", `url("${item.src}")`);
+      if(img.complete) img.classList.add("loaded");
     }
 
     return mediaSlot;
@@ -847,6 +880,32 @@
     ];
   }
 
+  // Option 2: Warm-cache preloader
+  const preloadCache = new Set();
+  function preloadImage(src){
+    if(!src || preloadCache.has(src)) return;
+    preloadCache.add(src);
+    const img = new Image();
+    img.decoding = "async";
+    img.loading = "eager";
+    img.src = src;
+  }
+  async function preloadBatch(list, delayMs=35){
+    for(const src of list){
+      preloadImage(src);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  function startPreloadingImages(){
+    const photoSrcs = (sortedPhotos || []).map(p => p.src);
+    const posterSrcs = (sortedVideos || []).map(v => v.poster).filter(Boolean);
+    const all = Array.from(new Set([...photoSrcs, ...posterSrcs]));
+    const run = () => preloadBatch(all, 35);
+    if("requestIdleCallback" in window) requestIdleCallback(run, { timeout: 2000 });
+    else setTimeout(run, 600);
+  }
+  window.addEventListener("load", startPreloadingImages);
+
   function renderAll(){
     featuredEl.innerHTML = "";
     extrasEl.innerHTML = "";
@@ -858,7 +917,6 @@
 
     // Photos first (top row), then videos (bottom row)
     featured.photos.forEach(p => {
-      // fitPhoto only matters on mobile; desktop uses isImage rule for all images
       featuredEl.appendChild(createPolaroid(p, false, { fitPhoto: !isDesktop() }));
     });
     featured.videos.forEach(v => {
@@ -870,13 +928,11 @@
       extras.forEach((item, i) => {
         const s = slots[i % slots.length];
         const card = createPolaroid(item, item.kind === "video", { extra:true });
-
         card.style.setProperty("--x", s.x);
         card.style.setProperty("--y", s.y);
         card.style.setProperty("--w", s.w);
         card.style.setProperty("--h", s.h);
         card.style.setProperty("--z", String(20 + i));
-
         extrasEl.appendChild(card);
       });
     }
@@ -894,6 +950,12 @@
   function advance(){
     closeViewer();
     renderAll();
+
+    // tiny lookahead for smoother focused swaps
+    for(let i=0;i<8 && sortedPhotos.length;i++){
+      const idx = (photoCursor + i) % sortedPhotos.length;
+      preloadImage(sortedPhotos[idx].src);
+    }
   }
 
   function startAuto(){
@@ -914,15 +976,114 @@
     else stopAuto();
   });
 
-  // Re-render on resize so switching between PC/mobile layouts updates instantly
   window.addEventListener("resize", () => {
     clearTimeout(window.__rz);
     window.__rz = setTimeout(() => renderAll(), 150);
   });
 
+  // Starfield
+  const starCanvas = document.getElementById("starCanvas");
+  const starCtx = starCanvas.getContext("2d");
+  let SW=0, SH=0, SDPR=1;
+  const stars = [];
+  const STAR_COUNT = 300;
+  let driftX=0, driftY=0;
+  let streak=null;
+
+  function resizeStars(){
+    SDPR = Math.min(2, window.devicePixelRatio || 1);
+    SW = window.innerWidth;
+    SH = window.innerHeight;
+    starCanvas.width = Math.floor(SW * SDPR);
+    starCanvas.height = Math.floor(SH * SDPR);
+    starCanvas.style.width = SW + "px";
+    starCanvas.style.height = SH + "px";
+    starCtx.setTransform(SDPR,0,0,SDPR,0,0);
+  }
+
+  function initStars(){
+    stars.length = 0;
+    for(let i=0;i<STAR_COUNT;i++){
+      stars.push({
+        x: Math.random()*SW,
+        y: Math.random()*SH,
+        r: Math.random()*1.6 + 0.3,
+        a: Math.random()*0.6 + 0.15,
+        tw: Math.random()*0.015 + 0.003,
+        ph: Math.random()*Math.PI*2
+      });
+    }
+  }
+
+  function maybeSpawnStreak(){
+    if(streak || Math.random() > 0.006) return;
+    streak = {
+      x: Math.random()*SW*0.6,
+      y: Math.random()*SH*0.5,
+      vx: 10 + Math.random()*8,
+      vy: 6 + Math.random()*6,
+      life: 0,
+      max: 20 + Math.random()*14
+    };
+  }
+
+  function drawStars(){
+    starCtx.clearRect(0,0,SW,SH);
+    driftX += 0.004;
+    driftY += 0.002;
+
+    for(const s of stars){
+      s.ph += s.tw;
+      const twinkle = (Math.sin(s.ph)+1)*0.5;
+      const alpha = s.a*(0.55 + twinkle*0.75);
+
+      const x = (s.x + driftX*12) % SW;
+      const y = (s.y + driftY*10) % SH;
+
+      starCtx.beginPath();
+      starCtx.fillStyle = `rgba(255,255,255,${alpha})`;
+      starCtx.arc(x,y,s.r,0,Math.PI*2);
+      starCtx.fill();
+
+      if(s.r > 1.2){
+        starCtx.beginPath();
+        starCtx.fillStyle = `rgba(125,225,255,${alpha*0.35})`;
+        starCtx.arc(x,y,s.r*2.4,0,Math.PI*2);
+        starCtx.fill();
+      }
+    }
+
+    maybeSpawnStreak();
+    if(streak){
+      streak.life++;
+      streak.x += streak.vx;
+      streak.y += streak.vy;
+
+      starCtx.strokeStyle = `rgba(190,245,255,${0.6*(1-streak.life/streak.max)})`;
+      starCtx.lineWidth = 2;
+      starCtx.beginPath();
+      starCtx.moveTo(streak.x, streak.y);
+      starCtx.lineTo(streak.x - streak.vx*2.5, streak.y - streak.vy*2.5);
+      starCtx.stroke();
+
+      if(streak.life > streak.max) streak = null;
+    }
+
+    requestAnimationFrame(drawStars);
+  }
+
   // Boot
+  resizeStars();
+  initStars();
+  drawStars();
+
   restart();
   if(autoToggle.checked) startAuto();
+
+  window.addEventListener("resize", () => {
+    resizeStars();
+    initStars();
+  });
 </script>
 </body>
 </html>
