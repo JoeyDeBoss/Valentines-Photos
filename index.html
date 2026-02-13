@@ -7,7 +7,7 @@
 
   <style>
     :root{
-      --bg: #0b0d12;
+      --bg: #07080c;                 /* darker page background */
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.72);
 
@@ -16,8 +16,8 @@
       --ink: rgba(0,0,0,.78);
 
       --radius: 16px;
-      --shadow: 0 16px 45px rgba(0,0,0,.35);
-      --shadow2: 0 10px 26px rgba(0,0,0,.28);
+      --shadow: 0 16px 45px rgba(0,0,0,.42);
+      --shadow2: 0 10px 26px rgba(0,0,0,.30);
     }
 
     *{ box-sizing: border-box; }
@@ -26,15 +26,14 @@
       margin:0;
       min-height: 100vh;
       background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(255, 205, 165, .14), transparent 60%),
-        radial-gradient(1000px 600px at 90% 40%, rgba(176, 220, 255, .12), transparent 55%),
-        radial-gradient(900px 600px at 50% 90%, rgba(190, 255, 210, .08), transparent 55%),
+        radial-gradient(1200px 700px at 20% 10%, rgba(64, 170, 255, .10), transparent 60%),
+        radial-gradient(1000px 600px at 90% 40%, rgba(255, 150, 200, .07), transparent 55%),
+        radial-gradient(900px 600px at 50% 90%, rgba(120, 255, 200, .06), transparent 55%),
         var(--bg);
       color: var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       overflow-x: hidden;
 
-      /* iPhone safe areas */
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
     }
@@ -46,7 +45,7 @@
 
     header{
       max-width: 1100px;
-      margin: 26px auto 10px;
+      margin: 22px auto 10px;
       display:flex;
       align-items:flex-end;
       justify-content: space-between;
@@ -54,16 +53,28 @@
     }
 
     .title{ display:flex; flex-direction:column; gap: 6px; }
+
+    /* ✅ Cuter title font (no external download required) */
     h1{
       margin:0;
-      font-size: clamp(24px, 3.2vw, 38px);
+      font-size: clamp(28px, 4vw, 44px);
       letter-spacing: -0.02em;
+      font-weight: 900;
+      font-family:
+        ui-rounded,
+        "SF Pro Rounded",
+        "Segoe Print",
+        "Bradley Hand",
+        "Comic Sans MS",
+        system-ui,
+        sans-serif;
     }
+
     .subtitle{
       color: var(--muted);
       font-size: 14px;
       line-height: 1.35;
-      max-width: 56ch;
+      max-width: 60ch;
     }
 
     .controls{
@@ -116,31 +127,24 @@
       padding-bottom: 18px;
     }
 
-    /* Background board like paper */
+    /* ✅ Darker, simpler “board” background (no busy grid) */
     .board{
       position: relative;
       width: 100%;
       min-height: 74vh;
       border-radius: 22px;
+
+      /* dark + slightly transparent feel */
       background:
-        linear-gradient(rgba(255,255,255,.04), rgba(255,255,255,.02)),
-        radial-gradient(900px 520px at 20% 20%, rgba(255,255,255,.06), transparent 60%),
-        radial-gradient(1000px 640px at 85% 55%, rgba(255,255,255,.05), transparent 60%);
+        radial-gradient(900px 520px at 30% 20%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(1000px 640px at 85% 55%, rgba(255,255,255,.035), transparent 60%),
+        rgba(0,0,0,.25);
+
       overflow: hidden;
       padding: 10px;
-    }
-
-    /* subtle grid texture */
-    .board::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background-image:
-        linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
-      background-size: 42px 42px;
-      opacity: .18;
-      pointer-events:none;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     @media (max-width: 520px){
@@ -175,7 +179,6 @@
       opacity: 1;
     }
 
-    /* paper edge */
     .polaroid::after{
       content:"";
       position:absolute;
@@ -210,7 +213,7 @@
       gap: 10px;
       font-size: 13px;
       color: var(--ink);
-      font-weight: 800;
+      font-weight: 850;
       letter-spacing: .01em;
       font-family: ui-rounded, "Segoe Print", "Bradley Hand", system-ui, sans-serif;
     }
@@ -225,6 +228,7 @@
       letter-spacing: .09em;
       text-transform: uppercase;
       color: rgba(0,0,0,.62);
+      white-space: nowrap;
     }
 
     .swapOut{ opacity: 0; }
@@ -251,7 +255,7 @@
     <div class="title">
       <h1>Us 💙</h1>
       <div class="subtitle">
-        Polaroid collage — cards overlap a little, but all stay visible. Timeline advances oldest → newest.
+        Polaroid collage — all cards stay visible. Timeline advances oldest → newest, and at least one video shows in the mix.
       </div>
     </div>
 
@@ -276,9 +280,10 @@
 
 <script>
   // =========================
-  // YOUR MEDIA LIST (as provided)
+  // YOUR MEDIA LIST
   // =========================
   const mediaItems = [
+    // Photos
     { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
     { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
     { kind: "image", src: "photos/03.jpg", date: "2025-9-2" },
@@ -333,6 +338,7 @@
     { kind: "image", src: "photos/51.jpg", date: "2025-12-26" },
     { kind: "image", src: "photos/53.jpg", date: "2025-10-30" },
 
+    // Videos
     { kind: "video", src: "videos/01.MOV", poster: "photos/01.jpg", date: "2025-10-25" },
     { kind: "video", src: "videos/21.MOV", poster: "photos/21.jpg", date: "2025-10-12" },
     { kind: "video", src: "videos/22.MOV", poster: "photos/22.jpg", date: "2025-10-12" },
@@ -349,11 +355,11 @@
   ];
 
   // =========================
-  // TIMELINE + SPEED
+  // BEHAVIOR SETTINGS
   // =========================
-  const TIMELINE_MODE = "asc";   // oldest -> newest
-  const AUTO_MS = 9500;         // cozy speed
-  const SWAP_FRACTION = 0.40;   // visible changes each advance
+  const TIMELINE_MODE = "asc";
+  const AUTO_MS = 11000;
+  const SWAP_FRACTION = 0.45;
   let timelineIndex = 0;
 
   const board = document.getElementById("board");
@@ -366,14 +372,16 @@
   function isPhone(){
     return window.matchMedia("(max-width: 520px)").matches;
   }
+
   function getCardCount(){
-    return isPhone() ? 8 : 12;        // ✅ more visible cards, still readable
+    return isPhone() ? 10 : 14;
   }
+
   function getMaxVideoCards(){
     return isPhone() ? 2 : 3;
   }
 
-  // Normalize dates like 2025-7-2 -> 2025-07-02 for sorting
+  // Normalize dates like 2025-7-2 -> 2025-07-02
   function normalizeDate(dateStr){
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
@@ -422,45 +430,66 @@
     return chunk;
   }
 
-  // ✅ This layout ensures cards don’t fully cover each other:
-  // We place them into a loose grid of slots, with small overlap + jitter.
-  function slotLayout(count){
-    const rect = board.getBoundingClientRect();
-    const pad = isPhone() ? 10 : 16;
+  // Ensure at least one video appears in the current set (if available)
+  function pickSetWithGuaranteedVideo(count){
+    const sorted = getSortedItems();
+    const videos = sorted.filter(x => x.kind === "video");
+    if(!videos.length) return getNextTimelineChunk(count);
 
-    // columns based on width
+    let videoPick = getNextTimelineChunk(1).find(x => x.kind === "video");
+    if(!videoPick) videoPick = videos[0];
+
+    const rest = getNextTimelineChunk(count - 1).filter(x => x.src !== videoPick.src);
+    while(rest.length < count - 1){
+      const add = getNextTimelineChunk(1)[0];
+      if(add && add.src !== videoPick.src) rest.push(add);
+    }
+    return [videoPick, ...rest].slice(0, count);
+  }
+
+  // ✅ Bigger polaroids on iPhone (uses more board space)
+  function spreadLayout(count){
+    const rect = board.getBoundingClientRect();
+    const pad = isPhone() ? 10 : 18;
+
     const cols = isPhone() ? 2 : (rect.width > 920 ? 4 : 3);
     const rows = Math.ceil(count / cols);
 
-    // card sizes (scaled for screen)
-    const maxW = (rect.width - pad*2) / cols;
-    const w = Math.min(isPhone() ? 220 : 240, maxW * 0.95);
-    const h = Math.round(w * 1.18);
+    const cellW = (rect.width - pad*2) / cols;
+    const cellH = (rect.height - pad*2) / rows;
 
-    // overlap amount (small, so you can still see all)
-    const overlapX = Math.round(w * 0.18);
-    const overlapY = Math.round(h * 0.18);
+    // Increase phone size (was ~0.92); this uses more of each cell
+    const baseW = Math.min(isPhone() ? 250 : 245, cellW * (isPhone() ? 0.98 : 0.92));
+    const baseH = Math.round(baseW * 1.18);
 
-    // slot step
-    const stepX = Math.max(10, (rect.width - pad*2 - w) / Math.max(1, cols - 1)) - overlapX;
-    const stepY = Math.max(10, (rect.height - pad*2 - h) / Math.max(1, rows - 1)) - overlapY;
+    const jitter = isPhone() ? 10 : 18;
 
-    const slots = [];
-    for(let i = 0; i < count; i++){
+    const layouts = [];
+    for(let i=0;i<count;i++){
       const c = i % cols;
       const r = Math.floor(i / cols);
 
-      const jitter = isPhone() ? 10 : 14;
-      const x = pad + c * stepX + (Math.random()*jitter - jitter/2);
-      const y = pad + r * stepY + (Math.random()*jitter - jitter/2);
-      const rot = (Math.random() * 14 - 7); // -7..+7
-      const z = 10 + i; // natural stacking order
+      const cx = pad + c * cellW + cellW/2;
+      const cy = pad + r * cellH + cellH/2;
 
-      slots.push({ x, y, r: rot, w, h, z });
+      const x = cx - baseW/2 + (Math.random()*jitter - jitter/2);
+      const y = cy - baseH/2 + (Math.random()*jitter - jitter/2);
+
+      const rot = (Math.random() * 16 - 8); // slightly calmer tilt on phone
+
+      const clampedX = Math.max(pad, Math.min(x, rect.width - baseW - pad));
+      const clampedY = Math.max(pad, Math.min(y, rect.height - baseH - pad));
+
+      layouts.push({ x: clampedX, y: clampedY, r: rot, w: baseW, h: baseH, z: 10 + i });
     }
 
-    // Shuffle slot assignment to feel organic
-    return shuffleArray(slots);
+    return shuffleArray(layouts);
+  }
+
+  function bringToFront(card){
+    const cards = [...board.querySelectorAll(".polaroid")];
+    const topZ = Math.max(...cards.map(c => parseInt(c.style.zIndex || "10", 10)));
+    card.style.zIndex = topZ + 10;
   }
 
   function createPolaroid(item){
@@ -490,7 +519,6 @@
 
     setMediaIntoCard(card, item);
 
-    // tap brings to front + play/pause for video
     card.addEventListener("click", () => {
       bringToFront(card);
       const v = card.querySelector("video");
@@ -507,11 +535,8 @@
     const mediaSlot = card.querySelector(".mediaSlot");
     mediaSlot.innerHTML = "";
 
-    const dateEl = card.querySelector(".caption > div:first-child");
-    dateEl.textContent = formatDateLabel(item.date);
-
-    const pill = card.querySelector(".pill");
-    pill.textContent = item.kind === "video" ? "LIVE" : "";
+    card.querySelector(".caption > div:first-child").textContent = formatDateLabel(item.date);
+    card.querySelector(".pill").textContent = item.kind === "video" ? "LIVE" : "";
 
     if(item.kind === "video"){
       const v = document.createElement("video");
@@ -527,7 +552,11 @@
       const ext = item.src.split(".").pop().toLowerCase();
       source.type = (ext === "mp4") ? "video/mp4" : "video/quicktime";
       v.appendChild(source);
+
       mediaSlot.appendChild(v);
+
+      // best-effort autoplay kick
+      setTimeout(() => v.play().catch(()=>{}), 80);
     } else {
       const img = document.createElement("img");
       img.loading = "lazy";
@@ -550,20 +579,13 @@
     card.style.zIndex = layout.z;
   }
 
-  function bringToFront(card){
-    // raise above others
-    const cards = [...board.querySelectorAll(".polaroid")];
-    const topZ = Math.max(...cards.map(c => parseInt(c.style.zIndex || "10", 10)));
-    card.style.zIndex = topZ + 10;
-  }
-
   function buildBoard(){
     board.innerHTML = "";
     timelineIndex = 0;
 
     const count = Math.min(getCardCount(), mediaItems.length);
-    const picked = getNextTimelineChunk(count);
-    const layouts = slotLayout(count);
+    const picked = pickSetWithGuaranteedVideo(count);
+    const layouts = spreadLayout(count);
 
     picked.forEach((item, i) => {
       const card = createPolaroid(item);
@@ -587,12 +609,23 @@
 
     let replacements = getNextTimelineChunk(swapCount);
 
-    // enforce video count
-    const imagePool = getSortedItems().filter(x => x.kind === "image");
+    // ensure at least one incoming video when possible
+    const sorted = getSortedItems();
+    const videos = sorted.filter(x => x.kind === "video");
+    const images = sorted.filter(x => x.kind === "image");
+
+    if(videos.length && roomForVideos > 0){
+      const hasVideoIncoming = replacements.some(x => x.kind === "video");
+      if(!hasVideoIncoming){
+        replacements[0] = videos[timelineIndex % videos.length];
+      }
+    }
+
+    // enforce max visible videos
     if(roomForVideos <= 0){
       let imgIdx = 0;
-      replacements = replacements.map(it => (it.kind === "video" && imagePool.length)
-        ? imagePool[(imgIdx++) % imagePool.length]
+      replacements = replacements.map(it => (it.kind === "video" && images.length)
+        ? images[(imgIdx++) % images.length]
         : it
       );
     } else {
@@ -600,8 +633,8 @@
       let imgIdx = 0;
       replacements = replacements.map(it => {
         if(it.kind === "video"){
-          if(usedVideos >= roomForVideos && imagePool.length){
-            return imagePool[(imgIdx++) % imagePool.length];
+          if(usedVideos >= roomForVideos && images.length){
+            return images[(imgIdx++) % images.length];
           }
           usedVideos++;
         }
@@ -609,10 +642,8 @@
       });
     }
 
-    // new layout for all cards so collage "shifts" like the example
-    const layouts = slotLayout(cards.length);
+    const layouts = spreadLayout(cards.length);
 
-    // swap selected cards
     indices.forEach((idx, k) => {
       const card = cards[idx];
       card.classList.add("swapOut");
@@ -620,12 +651,11 @@
       setTimeout(() => {
         setMediaIntoCard(card, replacements[k]);
         applyLayout(card, layouts[idx]);
-        bringToFront(card); // swapped cards pop forward slightly
+        bringToFront(card);
         card.classList.remove("swapOut");
-      }, 200);
+      }, 220);
     });
 
-    // rearrange the rest (so everything stays visible)
     cards.forEach((card, i) => {
       if(!indices.includes(i)){
         applyLayout(card, layouts[i]);
