@@ -192,7 +192,6 @@
       pointer-events: auto;
     }
 
-    /* ✅ Featured grid has a fixed height so cards don't "stretch" weirdly */
     .featuredGrid{
       position: relative;
       z-index: 10;
@@ -204,8 +203,6 @@
       max-width: 980px;
       margin: 0 auto;
       padding: 10px;
-
-      /* key: stable height prevents bottom caption stretch */
       height: min(66vh, 660px);
     }
 
@@ -218,7 +215,6 @@
       }
     }
 
-    /* ✅ Polaroid uses flex so caption doesn’t stretch */
     .polaroid{
       border-radius: var(--radius);
       background: linear-gradient(180deg, var(--paper2), var(--paper));
@@ -246,11 +242,10 @@
       z-index: var(--z);
       padding: 9px 9px 12px;
       opacity: .92;
-      height: auto; /* extras size by content */
+      height: auto;
     }
     .polaroid.extra:hover{ opacity: 1; }
 
-    /* mediaSlot grows; caption stays natural */
     .mediaSlot{
       width: 100%;
       flex: 1;
@@ -270,7 +265,7 @@
       object-fit: cover;
     }
 
-    /* ✅ TOP PHOTOS: show entire image (no crop) */
+    /* Top photos: show entire image */
     .fitPhoto .mediaSlot img{
       object-fit: contain;
       background: #0b0b12;
@@ -303,7 +298,6 @@
       white-space: nowrap;
     }
 
-    /* Fullscreen viewer */
     .viewer{
       position: fixed;
       inset: 0;
@@ -404,8 +398,8 @@
     <div class="title">
       <h1>Us 🩵</h1>
       <div class="subtitle">
-        10 polaroids total: 4 featured (2 photos top, 2 videos bottom) always fully visible + 6 extras.
-        Top photos now show the full image. Auto OFF lets you tap to enlarge (swipe down to close).
+        Focused 4 always advance oldest → newest. Extras are just decoration (do not consume the timeline).
+        Viewer works even when Auto is ON (Auto pauses and resumes). Swipe down to close.
       </div>
     </div>
 
@@ -434,7 +428,7 @@
   <!-- Fullscreen viewer -->
   <div class="viewer" id="viewer" aria-hidden="true">
     <div class="viewerCard" id="viewerCard">
-      <div class="viewerHint">Swipe down or tap ✕ to close</div>
+      <div class="viewerHint">Swipe down to close</div>
       <div class="viewerClose" id="viewerClose">✕</div>
       <div class="viewerMedia" id="viewerMedia"></div>
     </div>
@@ -442,7 +436,7 @@
 
 <script>
   // =========================
-  // MEDIA LIST
+  // MEDIA LIST (unchanged)
   // =========================
   const mediaItems = [
     { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
@@ -516,7 +510,6 @@
 
   const AUTO_MS = 11000;
   const TIMELINE_MODE = "asc";
-  let cursor = 0;
 
   const featuredEl = document.getElementById("featured");
   const extrasEl = document.getElementById("extras");
@@ -532,8 +525,12 @@
 
   let autoTimer = null;
   let viewerOpen = false;
+  let resumeAutoAfterClose = false;
 
-  // DATE normalize/sort
+  // Separate cursors so ONLY featured consumes the timeline
+  let photoCursor = 0;
+  let videoCursor = 0;
+
   function normalizeDate(dateStr){
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
@@ -564,67 +561,63 @@
     document.documentElement.style.setProperty("--bg-photo", `url("${src}")`);
   }
 
+  // Sort master list by date
   let sortedItems = [...mediaItems].sort((a,b) => dateKey(a.date) - dateKey(b.date));
   if(TIMELINE_MODE === "desc") sortedItems.reverse();
 
   const sortedPhotos = sortedItems.filter(x => x.kind === "image");
   const sortedVideos = sortedItems.filter(x => x.kind === "video");
 
-  // strict forward selection: 2 photos + 2 videos + 6 extras
-  function getNextFeaturedAndExtras(){
-    const len = sortedItems.length;
-    let idx = cursor;
-    let steps = 0;
-
+  // Featured set strictly from photo/video cursors
+  function getNextFeaturedSet(){
     const photos = [];
     const videos = [];
-    const used = new Set();
 
-    while((photos.length < 2 || videos.length < 2) && steps < len * 2){
-      const item = sortedItems[idx % len];
-      const key = item.kind + "|" + item.src;
-      if(!used.has(key)){
-        if(item.kind === "image" && photos.length < 2){ photos.push(item); used.add(key); }
-        else if(item.kind === "video" && videos.length < 2){ videos.push(item); used.add(key); }
-      }
+    for(let i=0;i<2;i++){
+      photos.push(sortedPhotos[(photoCursor + i) % sortedPhotos.length]);
+      videos.push(sortedVideos[(videoCursor + i) % sortedVideos.length]);
+    }
+
+    photoCursor = (photoCursor + 2) % Math.max(1, sortedPhotos.length);
+    videoCursor = (videoCursor + 2) % Math.max(1, sortedVideos.length);
+
+    return { photos, videos };
+  }
+
+  // Extras are decorative: pick 6 images “around” the current position WITHOUT moving cursors
+  function getExtrasSet(count=6){
+    const extras = [];
+    const start = (photoCursor + videoCursor) % sortedItems.length;
+    let idx = start;
+    let steps = 0;
+
+    while(extras.length < count && steps < sortedItems.length * 2){
+      const it = sortedItems[idx % sortedItems.length];
+      if(it.kind === "image") extras.push(it);
       idx++; steps++;
     }
 
-    while(photos.length < 2 && sortedPhotos.length){
-      const it = sortedPhotos[photos.length % sortedPhotos.length];
-      photos.push(it);
-    }
-    while(videos.length < 2 && sortedVideos.length){
-      const it = sortedVideos[videos.length % sortedVideos.length];
-      videos.push(it);
-    }
-
-    const extras = [];
-    let extraSteps = 0;
-    while(extras.length < 6 && extraSteps < len * 3){
-      const item = sortedItems[idx % len];
-      const key = item.kind + "|" + item.src;
-      if(!used.has(key) && item.kind === "image"){
-        extras.push(item); used.add(key);
-      }
-      idx++; extraSteps++;
-    }
-    extraSteps = 0;
-    while(extras.length < 6 && extraSteps < len * 3){
-      const item = sortedItems[idx % len];
-      const key = item.kind + "|" + item.src;
-      if(!used.has(key)){
-        extras.push(item); used.add(key);
-      }
-      idx++; extraSteps++;
+    // fallback: allow any kind
+    idx = start; steps = 0;
+    while(extras.length < count && steps < sortedItems.length * 2){
+      const it = sortedItems[idx % sortedItems.length];
+      extras.push(it);
+      idx++; steps++;
     }
 
-    cursor = idx % len;
-    return { photos, videos, extras };
+    return extras.slice(0, count);
   }
 
-  // Viewer open/close (with swipe down)
+  // Viewer open/close + auto pause/resume
   function openViewer(item){
+    // If auto is ON, pause it while viewing
+    if(autoToggle.checked && autoTimer){
+      resumeAutoAfterClose = true;
+      stopAuto();
+    } else {
+      resumeAutoAfterClose = false;
+    }
+
     viewerMedia.innerHTML = "";
 
     if(item.kind === "video"){
@@ -653,7 +646,6 @@
     viewer.setAttribute("aria-hidden", "false");
     viewerOpen = true;
 
-    // reset swipe vars
     viewerCard.style.setProperty("--vy", "0px");
     viewerCard.style.setProperty("--vo", "1");
   }
@@ -663,64 +655,60 @@
     viewer.setAttribute("aria-hidden", "true");
     viewerMedia.innerHTML = "";
     viewerOpen = false;
+
+    // Resume auto if it was running when opened
+    if(resumeAutoAfterClose && autoToggle.checked){
+      startAuto();
+    }
+    resumeAutoAfterClose = false;
   }
 
-  // close controls
   viewerClose.addEventListener("click", closeViewer);
-  viewer.addEventListener("click", (e) => {
-    if(e.target === viewer) closeViewer();
-  });
-  // tap media again closes
-  viewerCard.addEventListener("click", (e) => {
-    // avoid closing when pressing controls on video
-    if(e.target && e.target.tagName && (e.target.tagName.toLowerCase() === "video")) return;
-    // if click is not on the close button area, allow close by tap
-    if(e.target !== viewerClose) closeViewer();
-  });
+  viewer.addEventListener("click", (e) => { if(e.target === viewer) closeViewer(); });
 
-  // swipe down to close
-  let startY = null;
-  let startX = null;
-  let swiping = false;
+  // Swipe-down to close (robust)
+  let startY = null, startX = null, currentDy = 0, swiping = false;
 
   viewer.addEventListener("touchstart", (e) => {
     if(!viewerOpen) return;
     const t = e.touches[0];
     startY = t.clientY;
     startX = t.clientX;
+    currentDy = 0;
     swiping = true;
   }, {passive:true});
 
   viewer.addEventListener("touchmove", (e) => {
     if(!swiping || startY === null) return;
+
+    // prevent iOS from scrolling the page behind
+    e.preventDefault();
+
     const t = e.touches[0];
     const dy = t.clientY - startY;
     const dx = t.clientX - startX;
 
-    // only consider mostly-vertical swipes
     if(Math.abs(dy) > Math.abs(dx)){
-      const clamped = Math.max(0, dy);
-      viewerCard.style.setProperty("--vy", `${clamped}px`);
-      const opacity = Math.max(0.25, 1 - clamped / 300);
+      currentDy = Math.max(0, dy);
+      viewerCard.style.setProperty("--vy", `${currentDy}px`);
+      const opacity = Math.max(0.25, 1 - currentDy / 300);
       viewerCard.style.setProperty("--vo", `${opacity}`);
     }
-  }, {passive:true});
+  }, {passive:false});
 
   viewer.addEventListener("touchend", () => {
     if(!swiping) return;
     swiping = false;
 
-    const vy = parseFloat(getComputedStyle(viewerCard).transform.split(",")[5]) || 0;
-    // If dragged down enough, close
-    if(vy > 120){
+    if(currentDy > 120){
       closeViewer();
     } else {
-      // snap back
       viewerCard.style.setProperty("--vy", "0px");
       viewerCard.style.setProperty("--vo", "1");
     }
     startY = null;
     startX = null;
+    currentDy = 0;
   });
 
   function createMediaNode(item, isVideo){
@@ -778,8 +766,8 @@
     card.appendChild(createMediaNode(item, isVideo));
     card.appendChild(caption);
 
+    // Now allowed ALWAYS: opening viewer pauses auto + resumes after close
     card.addEventListener("click", () => {
-      if(autoToggle.checked) return;
       if(viewerOpen) closeViewer();
       else openViewer(item);
     });
@@ -801,22 +789,26 @@
     ];
   }
 
-  function renderAll(set){
+  function renderAll(){
     featuredEl.innerHTML = "";
     extrasEl.innerHTML = "";
 
-    setBackgroundFromItem(set.videos[1] || set.photos[1] || set.photos[0] || set.videos[0]);
+    const featured = getNextFeaturedSet();
+    const extras = getExtrasSet(6);
 
-    // Top row photos: full image visible (contain)
-    featuredEl.appendChild(createPolaroid(set.photos[0], false, { fitPhoto:true }));
-    featuredEl.appendChild(createPolaroid(set.photos[1], false, { fitPhoto:true }));
+    setBackgroundFromItem(featured.videos[1] || featured.photos[1] || featured.photos[0] || featured.videos[0]);
 
-    // Bottom row videos: cover, play
-    featuredEl.appendChild(createPolaroid(set.videos[0], true));
-    featuredEl.appendChild(createPolaroid(set.videos[1], true));
+    // Featured: top photos (full image)
+    featuredEl.appendChild(createPolaroid(featured.photos[0], false, { fitPhoto:true }));
+    featuredEl.appendChild(createPolaroid(featured.photos[1], false, { fitPhoto:true }));
 
+    // Featured: bottom videos
+    featuredEl.appendChild(createPolaroid(featured.videos[0], true));
+    featuredEl.appendChild(createPolaroid(featured.videos[1], true));
+
+    // Extras: decorative only
     const slots = getExtraSlots();
-    set.extras.forEach((item, i) => {
+    extras.forEach((item, i) => {
       const s = slots[i % slots.length];
       const card = createPolaroid(item, item.kind === "video", { extra:true });
 
@@ -829,18 +821,19 @@
       extrasEl.appendChild(card);
     });
 
-    statusEl.textContent = `Oldest → newest • 10 polaroids (4 featured + 6 extras)`;
+    statusEl.textContent = `Oldest → newest (featured only) • photos ${photoCursor}/${sortedPhotos.length} • videos ${videoCursor}/${sortedVideos.length}`;
   }
 
-  function build(){
-    cursor = 0;
+  function restart(){
+    photoCursor = 0;
+    videoCursor = 0;
     closeViewer();
-    renderAll(getNextFeaturedAndExtras());
+    renderAll();
   }
 
   function advance(){
     closeViewer();
-    renderAll(getNextFeaturedAndExtras());
+    renderAll();
   }
 
   function startAuto(){
@@ -854,20 +847,18 @@
   }
 
   shuffleBtn.addEventListener("click", advance);
-  refreshBtn.addEventListener("click", build);
+  refreshBtn.addEventListener("click", restart);
 
   autoToggle.addEventListener("change", (e) => {
     if(e.target.checked){
-      closeViewer();
       startAuto();
     } else {
       stopAuto();
     }
   });
 
-  // -------------------------
-  // STARFIELD (same as before)
-  // -------------------------
+  // Starfield (same as before; omitted here for brevity)
+  // ---- STARFIELD ----
   const canvas = document.getElementById("starCanvas");
   const ctx = canvas.getContext("2d");
   let W = 0, H = 0, DPR = 1;
@@ -955,15 +946,14 @@
   window.addEventListener("resize", () => {
     resizeCanvas();
     initStars();
-    // keep order, but re-render layout
-    build();
+    restart();
   });
 
   // BOOT
   resizeCanvas();
   initStars();
-  build();
-  startAuto();
+  restart();
+  if(autoToggle.checked) startAuto();
   drawStars();
 </script>
 </body>
