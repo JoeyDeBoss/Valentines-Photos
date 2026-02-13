@@ -216,7 +216,7 @@
       }
     }
 
-    /* ✅ PC: 8 focused cards (4 photos top, 4 videos bottom) */
+    /* PC: 8 focused cards (4 photos top, 4 videos bottom) */
     @media (min-width: 900px){
       .featuredGrid{
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -279,6 +279,15 @@
       object-fit: cover;
       position: relative;
       z-index: 1;
+    }
+
+    /* ===== Smooth fade-in for images (reduces flash) ===== */
+    .mediaSlot img{
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+    .mediaSlot img.loaded{
+      opacity: 1;
     }
 
     /* Mobile top photos: full image + blur fill */
@@ -417,6 +426,7 @@
       border: 1px solid rgba(255,255,255,.12);
       text-shadow: var(--glow);
       user-select:none;
+      z-index: 2;
     }
 
     .viewerClose{
@@ -435,6 +445,7 @@
       place-items:center;
       cursor: pointer;
       text-shadow: var(--glow);
+      z-index: 2;
     }
 
     footer{
@@ -463,6 +474,7 @@
     <div class="controls">
       <button id="shuffleBtn">Advance</button>
       <button id="refreshBtn">Restart</button>
+      <button id="musicBtn" type="button" aria-pressed="false">Music: Off</button>
       <label class="toggle" title="Auto advance every few seconds">
         <input id="autoToggle" type="checkbox" checked />
         Auto
@@ -482,6 +494,12 @@
     <div id="status">Loading…</div>
   </footer>
 
+  <!-- Music -->
+  <audio id="bgm" loop preload="auto">
+    <usic/piano.mp3
+  </audio>
+
+  <!-- Fullscreen viewer -->
   <div class="viewer" id="viewer" aria-hidden="true">
     <div class="viewerCard" id="viewerCard">
       <div class="viewerHint">Swipe down to close (or press Esc)</div>
@@ -491,7 +509,7 @@
   </div>
 
 <script>
-  // ========= MEDIA LIST (unchanged) =========
+  // ========= MEDIA LIST =========
   const mediaItems = [
     { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
     { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
@@ -571,6 +589,54 @@
   const refreshBtn = document.getElementById("refreshBtn");
   const autoToggle = document.getElementById("autoToggle");
 
+  // Music
+  const bgm = document.getElementById("bgm");
+  const musicBtn = document.getElementById("musicBtn");
+  let musicOn = false;
+  const MUSIC_TARGET = 0.28;
+  const FADE_MS = 1800;
+
+  function setMusicUI(){
+    musicBtn.textContent = musicOn ? "Music: On" : "Music: Off";
+    musicBtn.setAttribute("aria-pressed", musicOn ? "true" : "false");
+    musicBtn.style.background = musicOn ? "rgba(125,225,255,.18)" : "rgba(255,255,255,.10)";
+  }
+
+  async function fadeInAudio(aud, target=MUSIC_TARGET, ms=FADE_MS){
+    aud.volume = 0;
+    const steps = 30;
+    const stepMs = ms / steps;
+    for(let i=1;i<=steps;i++){
+      aud.volume = target * (i/steps);
+      await new Promise(r => setTimeout(r, stepMs));
+    }
+  }
+
+  async function startMusic(){
+    try{
+      await bgm.play();
+      musicOn = true;
+      setMusicUI();
+      fadeInAudio(bgm, MUSIC_TARGET, FADE_MS);
+    } catch(e){
+      musicBtn.textContent = "Tap again";
+    }
+  }
+
+  function stopMusic(){
+    bgm.pause();
+    musicOn = false;
+    setMusicUI();
+  }
+
+  musicBtn.addEventListener("click", () => {
+    if(musicOn) stopMusic();
+    else startMusic();
+  });
+
+  setMusicUI();
+
+  // Viewer
   const viewer = document.getElementById("viewer");
   const viewerCard = document.getElementById("viewerCard");
   const viewerMedia = document.getElementById("viewerMedia");
@@ -580,6 +646,7 @@
   let viewerOpen = false;
   let resumeAutoAfterClose = false;
 
+  // Cursors
   let photoCursor = 0;
   let videoCursor = 0;
 
@@ -617,14 +684,14 @@
     document.documentElement.style.setProperty("--bg-photo", `url("${src}")`);
   }
 
-  // Sort by date
+  // Sort by date (oldest -> newest)
   let sortedItems = [...mediaItems].sort((a,b) => dateKey(a.date) - dateKey(b.date));
   const sortedPhotos = sortedItems.filter(x => x.kind === "image");
   const sortedVideos = sortedItems.filter(x => x.kind === "video");
 
   function focusedPhotoCount(){ return isDesktop() ? 4 : 2; }
   function focusedVideoCount(){ return isDesktop() ? 4 : 2; }
-  function extrasCount(){ return isDesktop() ? 0 : 6; } // ✅ hide extras on PC
+  function extrasCount(){ return isDesktop() ? 0 : 6; } // hide extras on desktop
 
   function getNextFeaturedSet(){
     const pCount = focusedPhotoCount();
@@ -667,6 +734,7 @@
     return extras.slice(0, count);
   }
 
+  // Viewer open/close + auto pause/resume
   function openViewer(item){
     if(autoToggle.checked && autoTimer){
       resumeAutoAfterClose = true;
@@ -725,7 +793,7 @@
     if(e.key === "Escape" && viewerOpen) closeViewer();
   });
 
-  // Swipe-down to close
+  // Swipe-down to close viewer
   let startY = null, startX = null, currentDy = 0, swiping = false;
   viewer.addEventListener("touchstart", (e) => {
     if(!viewerOpen) return;
@@ -742,6 +810,7 @@
     const t = e.touches[0];
     const dy = t.clientY - startY;
     const dx = t.clientX - startX;
+
     if(Math.abs(dy) > Math.abs(dx)){
       currentDy = Math.max(0, dy);
       viewerCard.style.setProperty("--vy", `${currentDy}px`);
@@ -752,6 +821,7 @@
   viewer.addEventListener("touchend", () => {
     if(!swiping) return;
     swiping = false;
+
     if(currentDy > 120){
       closeViewer();
     } else {
@@ -761,6 +831,7 @@
     startY = null; startX = null; currentDy = 0;
   });
 
+  // Create media nodes (with image fade-in)
   function createMediaNode(item, isVideo){
     const mediaSlot = document.createElement("div");
     mediaSlot.className = "mediaSlot";
@@ -787,9 +858,19 @@
       img.loading = "lazy";
       img.decoding = "async";
       img.alt = "Photo";
+
+      // fade in once loaded
+      img.onload = () => img.classList.add("loaded");
+      img.onerror = () => img.classList.add("loaded");
+
       img.src = item.src;
       mediaSlot.appendChild(img);
+
+      // blur-fill background var
       mediaSlot.style.setProperty("--fitbg", `url("${item.src}")`);
+
+      // if cached, load event might fire very fast; ensure class applied next tick if already complete
+      if(img.complete) img.classList.add("loaded");
     }
 
     return mediaSlot;
@@ -817,6 +898,7 @@
 
     const mediaNode = createMediaNode(item, isVideo);
 
+    // ensure blur-fill variable applied to images
     if(!isVideo){
       card.style.setProperty("--fitbg", `url("${item.src}")`);
       mediaNode.style.setProperty("--fitbg", `url("${item.src}")`);
@@ -847,6 +929,41 @@
     ];
   }
 
+  // ---------- Option 2: Warm-cache image preloader ----------
+  const preloadCache = new Set();
+
+  function preloadImage(src){
+    if(!src || preloadCache.has(src)) return;
+    preloadCache.add(src);
+    const img = new Image();
+    img.decoding = "async";
+    img.loading = "eager";
+    img.src = src;
+  }
+
+  async function preloadBatch(list, delayMs=35){
+    for(const src of list){
+      preloadImage(src);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+
+  function startPreloadingImages(){
+    const photoSrcs = (sortedPhotos || []).map(p => p.src);
+    const posterSrcs = (sortedVideos || []).map(v => v.poster).filter(Boolean);
+    const all = Array.from(new Set([...photoSrcs, ...posterSrcs]));
+    const run = () => preloadBatch(all, 35);
+
+    if("requestIdleCallback" in window){
+      requestIdleCallback(run, { timeout: 2000 });
+    } else {
+      setTimeout(run, 600);
+    }
+  }
+
+  window.addEventListener("load", startPreloadingImages);
+  // ----------------------------------------------------------
+
   function renderAll(){
     featuredEl.innerHTML = "";
     extrasEl.innerHTML = "";
@@ -858,7 +975,7 @@
 
     // Photos first (top row), then videos (bottom row)
     featured.photos.forEach(p => {
-      // fitPhoto only matters on mobile; desktop uses isImage rule for all images
+      // fitPhoto only on mobile; desktop uses .isImage for all images
       featuredEl.appendChild(createPolaroid(p, false, { fitPhoto: !isDesktop() }));
     });
     featured.videos.forEach(v => {
@@ -894,6 +1011,12 @@
   function advance(){
     closeViewer();
     renderAll();
+
+    // small lookahead: warm next few photos quickly
+    for(let i=0;i<8 && sortedPhotos.length;i++){
+      const idx = (photoCursor + i) % sortedPhotos.length;
+      preloadImage(sortedPhotos[idx].src);
+    }
   }
 
   function startAuto(){
@@ -914,15 +1037,117 @@
     else stopAuto();
   });
 
-  // Re-render on resize so switching between PC/mobile layouts updates instantly
+  // Re-render on resize so switching between PC/mobile updates instantly
   window.addEventListener("resize", () => {
     clearTimeout(window.__rz);
     window.__rz = setTimeout(() => renderAll(), 150);
   });
 
+  // -------- Starfield (twinkle + drift + shooting stars) --------
+  const starCanvas = document.getElementById("starCanvas");
+  const starCtx = starCanvas.getContext("2d");
+  let SW=0, SH=0, SDPR=1;
+  const stars = [];
+  const STAR_COUNT = 300;
+  let driftX=0, driftY=0;
+  let streak=null;
+
+  function resizeStars(){
+    SDPR = Math.min(2, window.devicePixelRatio || 1);
+    SW = window.innerWidth;
+    SH = window.innerHeight;
+
+    starCanvas.width = Math.floor(SW * SDPR);
+    starCanvas.height = Math.floor(SH * SDPR);
+    starCanvas.style.width = SW + "px";
+    starCanvas.style.height = SH + "px";
+    starCtx.setTransform(SDPR,0,0,SDPR,0,0);
+  }
+
+  function initStars(){
+    stars.length = 0;
+    for(let i=0;i<STAR_COUNT;i++){
+      stars.push({
+        x: Math.random()*SW,
+        y: Math.random()*SH,
+        r: Math.random()*1.6 + 0.3,
+        a: Math.random()*0.6 + 0.15,
+        tw: Math.random()*0.015 + 0.003,
+        ph: Math.random()*Math.PI*2
+      });
+    }
+  }
+
+  function maybeSpawnStreak(){
+    if(streak || Math.random() > 0.006) return;
+    streak = {
+      x: Math.random()*SW*0.6,
+      y: Math.random()*SH*0.5,
+      vx: 10 + Math.random()*8,
+      vy: 6 + Math.random()*6,
+      life: 0,
+      max: 20 + Math.random()*14
+    };
+  }
+
+  function drawStars(){
+    starCtx.clearRect(0,0,SW,SH);
+    driftX += 0.004;
+    driftY += 0.002;
+
+    for(const s of stars){
+      s.ph += s.tw;
+      const twinkle = (Math.sin(s.ph)+1)*0.5;
+      const alpha = s.a*(0.55 + twinkle*0.75);
+
+      const x = (s.x + driftX*12) % SW;
+      const y = (s.y + driftY*10) % SH;
+
+      starCtx.beginPath();
+      starCtx.fillStyle = `rgba(255,255,255,${alpha})`;
+      starCtx.arc(x,y,s.r,0,Math.PI*2);
+      starCtx.fill();
+
+      if(s.r > 1.2){
+        starCtx.beginPath();
+        starCtx.fillStyle = `rgba(125,225,255,${alpha*0.35})`;
+        starCtx.arc(x,y,s.r*2.4,0,Math.PI*2);
+        starCtx.fill();
+      }
+    }
+
+    maybeSpawnStreak();
+    if(streak){
+      streak.life++;
+      streak.x += streak.vx;
+      streak.y += streak.vy;
+
+      starCtx.strokeStyle = `rgba(190,245,255,${0.6*(1-streak.life/streak.max)})`;
+      starCtx.lineWidth = 2;
+      starCtx.beginPath();
+      starCtx.moveTo(streak.x, streak.y);
+      starCtx.lineTo(streak.x - streak.vx*2.5, streak.y - streak.vy*2.5);
+      starCtx.stroke();
+
+      if(streak.life > streak.max) streak = null;
+    }
+
+    requestAnimationFrame(drawStars);
+  }
+  // ------------------------------------------------------------
+
   // Boot
+  resizeStars();
+  initStars();
+  drawStars();
+
   restart();
   if(autoToggle.checked) startAuto();
+
+  window.addEventListener("resize", () => {
+    resizeStars();
+    initStars();
+  });
 </script>
 </body>
 </html>
