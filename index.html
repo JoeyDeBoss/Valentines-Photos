@@ -192,6 +192,7 @@
       pointer-events: auto;
     }
 
+    /* MOBILE default: 2x2 featured */
     .featuredGrid{
       position: relative;
       z-index: 10;
@@ -212,6 +213,18 @@
         gap: 12px;
         padding: 6px;
         height: min(68vh, 640px);
+      }
+    }
+
+    /* ✅ PC: 8 focused cards (4 photos top, 4 videos bottom) */
+    @media (min-width: 900px){
+      .featuredGrid{
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        max-width: 1200px;
+        height: min(78vh, 900px);
+        gap: 18px;
+        padding: 16px;
       }
     }
 
@@ -268,7 +281,7 @@
       z-index: 1;
     }
 
-    /* Mobile top photos: full image + blurred fill */
+    /* Mobile top photos: full image + blur fill */
     .fitPhoto .mediaSlot{
       background-image: var(--fitbg);
       background-size: cover;
@@ -292,16 +305,8 @@
       z-index: 1;
     }
 
-    /* ✅ Desktop: show WHOLE photo in EVERY polaroid (no crop) with blur fill */
+    /* Desktop: show whole image in ALL image polaroids (no crop) + blur fill */
     @media (min-width: 900px){
-      .featuredGrid{
-        height: min(78vh, 860px);
-        max-width: 1100px;
-        gap: 18px;
-        padding: 16px;
-      }
-
-      /* All image polaroids on desktop use the same blur-fill fit */
       .isImage .mediaSlot{
         background-image: var(--fitbg);
         background-size: cover;
@@ -477,7 +482,6 @@
     <div id="status">Loading…</div>
   </footer>
 
-  <!-- Fullscreen viewer -->
   <div class="viewer" id="viewer" aria-hidden="true">
     <div class="viewerCard" id="viewerCard">
       <div class="viewerHint">Swipe down to close (or press Esc)</div>
@@ -487,9 +491,7 @@
   </div>
 
 <script>
-  // =========================
-  // MEDIA LIST (your current list)
-  // =========================
+  // ========= MEDIA LIST (unchanged) =========
   const mediaItems = [
     { kind: "image", src: "photos/01.jpg", date: "2025-7-25" },
     { kind: "image", src: "photos/02.jpg", date: "2025-12-13" },
@@ -581,6 +583,10 @@
   let photoCursor = 0;
   let videoCursor = 0;
 
+  function isDesktop(){
+    return window.matchMedia("(min-width: 900px)").matches;
+  }
+
   function normalizeDate(dateStr){
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
@@ -616,23 +622,38 @@
   const sortedPhotos = sortedItems.filter(x => x.kind === "image");
   const sortedVideos = sortedItems.filter(x => x.kind === "video");
 
+  function focusedPhotoCount(){ return isDesktop() ? 4 : 2; }
+  function focusedVideoCount(){ return isDesktop() ? 4 : 2; }
+  function extrasCount(){ return isDesktop() ? 0 : 6; } // ✅ hide extras on PC
+
   function getNextFeaturedSet(){
+    const pCount = focusedPhotoCount();
+    const vCount = focusedVideoCount();
+
     const photos = [];
     const videos = [];
-    for(let i=0;i<2;i++){
+
+    for(let i=0;i<pCount;i++){
       photos.push(sortedPhotos[(photoCursor + i) % sortedPhotos.length]);
+    }
+    for(let i=0;i<vCount;i++){
       videos.push(sortedVideos[(videoCursor + i) % sortedVideos.length]);
     }
-    photoCursor = (photoCursor + 2) % Math.max(1, sortedPhotos.length);
-    videoCursor = (videoCursor + 2) % Math.max(1, sortedVideos.length);
+
+    photoCursor = (photoCursor + pCount) % Math.max(1, sortedPhotos.length);
+    videoCursor = (videoCursor + vCount) % Math.max(1, sortedVideos.length);
+
     return { photos, videos };
   }
 
-  function getExtrasSet(count=6){
+  function getExtrasSet(count){
     const extras = [];
+    if(count <= 0) return extras;
+
     const start = (photoCursor + videoCursor) % sortedItems.length;
     let idx = start;
     let steps = 0;
+
     while(extras.length < count && steps < sortedItems.length * 2){
       const it = sortedItems[idx % sortedItems.length];
       if(it.kind === "image") extras.push(it);
@@ -646,7 +667,6 @@
     return extras.slice(0, count);
   }
 
-  // Auto pause/resume around viewer
   function openViewer(item){
     if(autoToggle.checked && autoTimer){
       resumeAutoAfterClose = true;
@@ -656,7 +676,6 @@
     }
 
     viewerMedia.innerHTML = "";
-
     if(item.kind === "video"){
       const v = document.createElement("video");
       v.controls = true;
@@ -702,14 +721,12 @@
   viewerClose.addEventListener("click", closeViewer);
   viewer.addEventListener("click", (e) => { if(e.target === viewer) closeViewer(); });
 
-  // ✅ Desktop close with ESC
   window.addEventListener("keydown", (e) => {
     if(e.key === "Escape" && viewerOpen) closeViewer();
   });
 
-  // ✅ Swipe-down to close (RESTORED)
+  // Swipe-down to close
   let startY = null, startX = null, currentDy = 0, swiping = false;
-
   viewer.addEventListener("touchstart", (e) => {
     if(!viewerOpen) return;
     const t = e.touches[0];
@@ -721,11 +738,10 @@
 
   viewer.addEventListener("touchmove", (e) => {
     if(!swiping || startY === null) return;
-    e.preventDefault(); // important for iOS
+    e.preventDefault();
     const t = e.touches[0];
     const dy = t.clientY - startY;
     const dx = t.clientX - startX;
-
     if(Math.abs(dy) > Math.abs(dx)){
       currentDy = Math.max(0, dy);
       viewerCard.style.setProperty("--vy", `${currentDy}px`);
@@ -736,16 +752,13 @@
   viewer.addEventListener("touchend", () => {
     if(!swiping) return;
     swiping = false;
-
     if(currentDy > 120){
       closeViewer();
     } else {
       viewerCard.style.setProperty("--vy", "0px");
       viewerCard.style.setProperty("--vo", "1");
     }
-    startY = null;
-    startX = null;
-    currentDy = 0;
+    startY = null; startX = null; currentDy = 0;
   });
 
   function createMediaNode(item, isVideo){
@@ -776,8 +789,6 @@
       img.alt = "Photo";
       img.src = item.src;
       mediaSlot.appendChild(img);
-
-      // Set background for blur-fill (desktop uses isImage class too)
       mediaSlot.style.setProperty("--fitbg", `url("${item.src}")`);
     }
 
@@ -806,8 +817,7 @@
 
     const mediaNode = createMediaNode(item, isVideo);
 
-    // Make sure top photos have blur fill available
-    if(fitPhoto && item.kind === "image"){
+    if(!isVideo){
       card.style.setProperty("--fitbg", `url("${item.src}")`);
       mediaNode.style.setProperty("--fitbg", `url("${item.src}")`);
     }
@@ -842,33 +852,36 @@
     extrasEl.innerHTML = "";
 
     const featured = getNextFeaturedSet();
-    const extras = getExtrasSet(6);
+    const extras = getExtrasSet(extrasCount());
 
-    setBackgroundFromItem(featured.videos[1] || featured.photos[1] || featured.photos[0] || featured.videos[0]);
+    setBackgroundFromItem(featured.videos[0] || featured.photos[0]);
 
-    // Top photos (mobile: contain + blur fill)
-    featuredEl.appendChild(createPolaroid(featured.photos[0], false, { fitPhoto:true }));
-    featuredEl.appendChild(createPolaroid(featured.photos[1], false, { fitPhoto:true }));
-
-    // Bottom videos
-    featuredEl.appendChild(createPolaroid(featured.videos[0], true));
-    featuredEl.appendChild(createPolaroid(featured.videos[1], true));
-
-    const slots = getExtraSlots();
-    extras.forEach((item, i) => {
-      const s = slots[i % slots.length];
-      const card = createPolaroid(item, item.kind === "video", { extra:true });
-
-      card.style.setProperty("--x", s.x);
-      card.style.setProperty("--y", s.y);
-      card.style.setProperty("--w", s.w);
-      card.style.setProperty("--h", s.h);
-      card.style.setProperty("--z", String(20 + i));
-
-      extrasEl.appendChild(card);
+    // Photos first (top row), then videos (bottom row)
+    featured.photos.forEach(p => {
+      // fitPhoto only matters on mobile; desktop uses isImage rule for all images
+      featuredEl.appendChild(createPolaroid(p, false, { fitPhoto: !isDesktop() }));
+    });
+    featured.videos.forEach(v => {
+      featuredEl.appendChild(createPolaroid(v, true));
     });
 
-    statusEl.textContent = `Oldest → newest (featured only) • photos ${photoCursor}/${sortedPhotos.length} • videos ${videoCursor}/${sortedVideos.length}`;
+    if(extras.length){
+      const slots = getExtraSlots();
+      extras.forEach((item, i) => {
+        const s = slots[i % slots.length];
+        const card = createPolaroid(item, item.kind === "video", { extra:true });
+
+        card.style.setProperty("--x", s.x);
+        card.style.setProperty("--y", s.y);
+        card.style.setProperty("--w", s.w);
+        card.style.setProperty("--h", s.h);
+        card.style.setProperty("--z", String(20 + i));
+
+        extrasEl.appendChild(card);
+      });
+    }
+
+    statusEl.textContent = `Focused: ${focusedPhotoCount()} photos + ${focusedVideoCount()} videos • ${isDesktop() ? "PC mode" : "Mobile mode"}`;
   }
 
   function restart(){
@@ -901,10 +914,15 @@
     else stopAuto();
   });
 
+  // Re-render on resize so switching between PC/mobile layouts updates instantly
+  window.addEventListener("resize", () => {
+    clearTimeout(window.__rz);
+    window.__rz = setTimeout(() => renderAll(), 150);
+  });
+
   // Boot
   restart();
   if(autoToggle.checked) startAuto();
 </script>
 </body>
 </html>
-
