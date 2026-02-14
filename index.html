@@ -596,19 +596,6 @@
     return window.matchMedia("(min-width: 900px)").matches;
   }
 
-  function clampIndex1Based(cursor, total){
-    if(total <= 0) return 0;
-    return (cursor % total) + 1;
-  }
-
-  function setProgressStatus(){
-    const pTotal = sortedPhotos.length;
-    const vTotal = sortedVideos.length;
-    const pPos = clampIndex1Based(photoCursor, pTotal);
-    const vPos = clampIndex1Based(videoCursor, vTotal);
-    statusEl.textContent = `Photos: ${pPos}/${pTotal} • Videos: ${vPos}/${vTotal} • ${isDesktop() ? "PC" : "Mobile"}`;
-  }
-
   function normalizeDate(dateStr){
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
@@ -647,6 +634,33 @@
   function focusedPhotoCount(){ return isDesktop() ? 4 : 2; }
   function focusedVideoCount(){ return isDesktop() ? 4 : 2; }
   function extrasCount(){ return isDesktop() ? 0 : 6; }
+
+  // ===== Range status (B) =====
+  function mod(n, m){ return ((n % m) + m) % m; }
+
+  function rangeFromCursorAfterAdvance(cursorAfter, step, total){
+    if(total <= 0) return "0/0";
+    if(step <= 1) {
+      const pos = mod(cursorAfter - 1, total) + 1;
+      return `${pos}/${total}`;
+    }
+    const start = mod(cursorAfter - step, total) + 1;
+    const end = mod(cursorAfter - 1, total) + 1;
+    return `${start}–${end}/${total}`;
+  }
+
+  function setProgressStatus(){
+    const pTotal = sortedPhotos.length;
+    const vTotal = sortedVideos.length;
+    const pStep = focusedPhotoCount();
+    const vStep = focusedVideoCount();
+
+    // photoCursor/videoCursor are "after" cursors because getNextFeaturedSet increments them
+    const pLabel = rangeFromCursorAfterAdvance(photoCursor, pStep, pTotal);
+    const vLabel = rangeFromCursorAfterAdvance(videoCursor, vStep, vTotal);
+
+    statusEl.textContent = `Photos: ${pLabel} • Videos: ${vLabel} • ${isDesktop() ? "PC" : "Mobile"}`;
+  }
 
   // ---------- NO-FLASH PRELOAD HELPERS ----------
   const preloadCache = new Set();
@@ -1027,7 +1041,7 @@
     window.__rz = setTimeout(() => renderAll(), 150);
   });
 
-  // Starfield (subtle but immersive shooting stars)
+  // Starfield (subtle shooting stars)
   const starCanvas = document.getElementById("starCanvas");
   const starCtx = starCanvas.getContext("2d");
   let SW=0, SH=0, SDPR=1;
@@ -1065,7 +1079,7 @@
 
   function maybeSpawnStreak(){
     if(streaks.length >= MAX_STREAKS) return;
-    if(Math.random() > 0.014) return; // subtle but visible
+    if(Math.random() > 0.014) return;
 
     const fromLeft = Math.random() < 0.5;
 
